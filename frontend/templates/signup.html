@@ -1,0 +1,123 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inscription — Kimitsu</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+ <style>
+    .auth-left::before {
+      background: radial-gradient(ellipse, rgba(155,133,212,0.15) 0%, transparent 70%);
+    }
+    .trial-badge {
+      background: rgba(155,133,212,0.08);
+      border: 1px solid rgba(155,133,212,0.18);
+      border-radius: 2px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.8rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+    }
+    .trial-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lavender); margin-top: 5px; flex-shrink: 0; }
+    .trial-text { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+    .trial-text strong { color: var(--lavender); font-weight: 400; }
+    .forgot { font-size: 0.78rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .forgot:hover { color: var(--lavender); }
+  </style>
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="auth-left">
+      <a class="nav-logo" href="{% url 'index' %}">Kimitsu</a>
+      <div class="auth-left-content">
+        <h1 class="auth-left-title">Commence<br /><em>aujourd'hui.</em><br />Gratuitement.</h1>
+        <p class="auth-left-sub">Ton premier jour avec Kimitsu est entièrement gratuit. Aucune carte bancaire requise. Juste toi et ton assistant WhatsApp.</p>
+      </div>
+      <div class="auth-left-footer">© 2026 Kimitsu by Danscot</div>
+    </div>
+    <div class="auth-right">
+      <div class="auth-form-wrap">
+        <h2 class="auth-form-title">Créer un compte</h2>
+        <p class="auth-form-sub">Tu as déjà un compte ? <a href="{% url 'login' %}">Se connecter</a></p>
+
+        <div class="trial-badge">
+          <div class="trial-dot"></div>
+          <div class="trial-text"><strong>Essai gratuit inclus</strong> — 24 heures d'accès complet, sans engagement et sans carte bancaire.</div>
+        </div>
+
+        <form method="post" onsubmit="handleSignup(event)">
+          {% csrf_token %}
+          <div class="field">
+            <label for="id_name">Nom complet</label>
+            <input type="text" id="id_name" name="name" placeholder="Ton nom" required />
+          </div>
+          <div class="field">
+            <label for="id_email">Adresse email</label>
+            <input type="email" id="id_email" name="email" placeholder="toi@email.com" required />
+          </div>
+          <div class="field">
+            <label for="id_password">Mot de passe</label>
+            <input type="password" id="id_password" name="password" placeholder="••••••••" required />
+            <div class="field-error" id="passError">Le mot de passe doit contenir au moins 8 caractères.</div>
+          </div>
+          <div class="field">
+            <label for="id_confirm">Confirmer le mot de passe</label>
+            <input type="password" id="id_confirm" name="confirm" placeholder="••••••••" required />
+            <div class="field-error" id="confirmError">Les mots de passe ne correspondent pas.</div>
+          </div>
+          <button type="submit" class="submit-btn">Créer mon compte</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function handleSignup(e) {
+      e.preventDefault();
+      const pass = document.getElementById('id_password').value;
+      const confirm = document.getElementById('id_confirm').value;
+      let valid = true;
+
+      if (pass.length < 8) {
+        document.getElementById('passError').style.display = 'block';
+        valid = false;
+      } else {
+        document.getElementById('passError').style.display = 'none';
+      }
+
+      if (pass !== confirm) {
+        document.getElementById('confirmError').style.display = 'block';
+        valid = false;
+      } else {
+        document.getElementById('confirmError').style.display = 'none';
+      }
+
+      if (valid) {
+        const form = e.target;
+        const formData = new FormData(form);
+        fetch("{% url 'signup' %}", {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+          },
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.href = "{% url 'pairing' %}";
+          } else {
+            alert("Une erreur est survenue. Veuillez réessayer.");
+          }
+        })
+        .catch(error => {
+          alert("Une erreur est survenue. Veuillez réessayer.");
+        });
+      }
+    }
+  </script>
+</body>
+</html>

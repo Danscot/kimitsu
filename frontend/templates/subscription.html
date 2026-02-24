@@ -1,0 +1,311 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abonnement — Kimitsu</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <style>
+    .current-plan {
+      background: var(--surface);
+      border: 1px solid var(--lavender-deep);
+      border-radius: 4px;
+      padding: 2rem;
+      margin-bottom: 3rem;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .current-plan::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--lavender-deep), var(--magenta));
+    }
+    .cp-label { font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; }
+    .cp-name { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; color: var(--lavender); margin-bottom: 0.3rem; }
+    .cp-expire { font-size: 0.82rem; color: var(--muted); }
+    .cp-expire strong { color: var(--text); font-weight: 400; }
+
+    .plans-label { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.2rem; }
+
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      margin-bottom: 3rem;
+    }
+    .plan {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2rem;
+      background: var(--surface);
+      cursor: pointer;
+      transition: border-color 0.3s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .plan:hover { border-color: var(--lavender-deep); transform: translateY(-2px); }
+    .plan.selected { border-color: var(--lavender-deep); }
+    .plan.selected::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--lavender-deep), var(--magenta));
+    }
+    .plan-name { font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
+    .plan-price { font-family: 'Cormorant Garamond', serif; font-size: 2.8rem; font-weight: 300; line-height: 1; margin-bottom: 0.2rem; }
+    .plan-currency { font-family: 'DM Sans', sans-serif; font-size: 1rem; color: var(--muted); }
+    .plan-period { font-size: 0.78rem; color: var(--muted); margin-bottom: 1.5rem; }
+    .plan-divider { height: 1px; background: var(--border); margin-bottom: 1.2rem; }
+    .plan-features { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .plan-features li { font-size: 0.82rem; color: var(--muted); display: flex; align-items: center; gap: 0.6rem; }
+    .plan-features li::before { content: ''; display: block; width: 14px; height: 1px; background: var(--lavender); flex-shrink: 0; }
+
+    .radio-check {
+      position: absolute;
+      top: 1.2rem; right: 1.2rem;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .plan.selected .radio-check { border-color: var(--lavender-deep); background: var(--lavender-deep); }
+    .radio-check::after { content: ''; display: none; width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+    .plan.selected .radio-check::after { display: block; }
+
+    .payment-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .payment-header { padding: 1.2rem 1.8rem; border-bottom: 1px solid var(--border); }
+    .payment-header-title { font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    .payment-body { padding: 1.8rem; }
+
+    .pay-methods { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .pay-method {
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 0.65rem 1.2rem;
+      cursor: pointer;
+      font-size: 0.82rem;
+      color: var(--muted);
+      transition: all 0.2s;
+      background: var(--surface2);
+    }
+    .pay-method.selected { border-color: var(--lavender-deep); color: var(--lavender); background: rgba(155,133,212,0.08); }
+
+    .summary {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1.8rem;
+      margin-bottom: 1.5rem;
+    }
+    .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 0.55rem 0; }
+    .summary-row-label { font-size: 0.85rem; color: var(--muted); }
+    .summary-row-value { font-size: 0.85rem; color: var(--text); }
+    .summary-total { border-top: 1px solid var(--border); margin-top: 0.5rem; padding-top: 1rem; }
+    .summary-total .summary-row-label { color: var(--text); font-weight: 500; font-size: 0.9rem; }
+    .summary-total .summary-row-value { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 300; color: var(--lavender); }
+
+    .secure-note { text-align: center; font-size: 0.75rem; color: var(--muted); margin-top: 0.8rem; }
+
+    @media (max-width: 768px) {
+      .plans-grid { grid-template-columns: 1fr; }
+      .current-plan { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="nav-logo" href="{% url 'index' %}">Kimitsu</a>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="{% url 'profile' %}">Mon compte</a></li>
+        <li><a href="{% url 'pairing' %}">Connexion</a></li>
+        <li><a href="{% url 'subscription' %}" class="active">Abonnement</a></li>
+      </ul>
+      <a class="logout-btn" href="">Déconnexion</a>
+    </div>
+    <div class="hamburger" onclick="toggleMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="{% url 'profile' %}" onclick="toggleMenu()">Mon compte</a>
+    <a href="{% url 'pairing' %}" onclick="toggleMenu()">Connexion</a>
+    <a href="{% url 'subscription' %}" onclick="toggleMenu()">Abonnement</a>
+    <a href="">Déconnexion</a>
+  </div>
+
+  <div class="page">
+    <p class="section-label">Tarifs & Abonnement</p>
+    <h1 class="section-title">Ton abonnement</h1>
+    <p class="section-sub">Choisis le plan qui te convient. Change ou renouvelle à tout moment.</p>
+
+    {% if user.subscription_plan %}
+      <div class="current-plan">
+        <div>
+          <div class="cp-label">Plan actuel</div>
+          <div class="cp-name">
+            {{ user.subscription_plan|title }}
+          </div>
+          <div class="cp-expire">
+            Expire le <strong>{{ user.subscription_end|date:"j F Y" }}</strong>
+          </div>
+        </div>
+        <span class="badge badge-active">
+          <span class="badge-dot badge-dot-pulse"></span> Actif
+        </span>
+      </div>
+    {% else %}
+      <div class="current-plan">
+        <div>
+          <div class="cp-label">Plan actuel</div>
+          <div class="cp-name">Aucun</div>
+          <div class="cp-expire">Aucun abonnement actif</div>
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="plans-label">Changer de plan</div>
+    <div class="plans-grid">
+      <div class="plan {% if not user.subscription_plan %}selected{% endif %}" onclick="selectPlan(this,'Essai','0','24 heures')">
+        <div class="radio-check"></div>
+        <div class="plan-name">Essai</div>
+        <div class="plan-price">0 <span class="plan-currency">XAF</span></div>
+        <div class="plan-period">24 heures</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li>Accès complet</li>
+          <li>Sans engagement</li>
+        </ul>
+      </div>
+      <div class="plan {% if user.subscription_plan == 'bimensuel' %}selected{% endif %}" onclick="selectPlan(this,'Bimensuel','500','14 Jours')">
+        <div class="radio-check"></div>
+        <div class="plan-name">Bimensuel</div>
+        <div class="plan-price">500 <span class="plan-currency">XAF</span></div>
+        <div class="plan-period">14 Jours</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li>Accès complet</li>
+          <li>Support disponible</li>
+        </ul>
+      </div>
+      <div class="plan {% if user.subscription_plan == 'mensuel' %}selected{% endif %}" onclick="selectPlan(this,'Mensuel','1000','30 Jours')">
+        <div class="radio-check"></div>
+        <div class="plan-name">Mensuel</div>
+        <div class="plan-price">1000 <span class="plan-currency">XAF</span></div>
+        <div class="plan-period">30 Jours</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li>Accès complet</li>
+          <li>Meilleur rapport</li>
+          <li>Support prioritaire</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="payment-card">
+      <div class="payment-header">
+        <div class="payment-header-title">Mode de paiement</div>
+      </div>
+      <div class="payment-body">
+        <div class="pay-methods">
+          <div class="pay-method selected" onclick="selectMethod(this)">Mobile Money</div>
+          <div class="pay-method" onclick="selectMethod(this)">Orange Money</div>
+          <div class="pay-method" onclick="selectMethod(this)">Autres</div>
+        </div>
+        <div class="field">
+          <label>Numéro de téléphone</label>
+          <input type="tel" id="phoneInput" placeholder="+237 6•• ••• •••" value="{{ user.phone_number|default:'' }}" />
+        </div>
+      </div>
+    </div>
+
+    <div class="summary">
+      <div class="summary-row">
+        <span class="summary-row-label">Plan sélectionné</span>
+        <span class="summary-row-value" id="sumPlan">
+          {% if user.subscription_plan %}
+            {{ user.subscription_plan|title }}
+          {% else %}
+            Essai
+          {% endif %}
+        </span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-row-label">Durée</span>
+        <span class="summary-row-value" id="sumPeriod">
+          {% if user.subscription_plan == 'bimensuel' %}
+            14 Jours
+          {% elif user.subscription_plan == 'mensuel' %}
+            30 Jours
+          {% else %}
+            24 heures
+          {% endif %}
+        </span>
+      </div>
+      <div class="summary-row summary-total">
+        <span class="summary-row-label">Total</span>
+        <span class="summary-row-value" id="sumTotal">
+          {% if user.subscription_plan == 'bimensuel' %}
+            500 XAF
+          {% elif user.subscription_plan == 'mensuel' %}
+            1000 XAF
+          {% else %}
+            Gratuit
+          {% endif %}
+        </span>
+      </div>
+    </div>
+
+    <form method="post" action="">
+      {% csrf_token %}
+      <input type="hidden" id="selectedPlan" name="plan" value="{{ user.subscription_plan|default:'Essai' }}">
+      <input type="hidden" id="selectedMethod" name="payment_method" value="Mobile Money">
+      <input type="hidden" id="phoneNumber" name="phone_number" value="{{ user.phone_number|default:'' }}">
+      <button type="submit" class="submit-btn">Confirmer et payer</button>
+    </form>
+    <p class="secure-note">Paiement sécurisé via Mobile Money</p>
+  </div>
+
+
+  <script>
+    function toggleMenu() { document.getElementById('mobileMenu').classList.toggle('open'); }
+    function selectPlan(el, name, price, period) {
+      document.querySelectorAll('.plan').forEach(p => p.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById('sumPlan').textContent = name;
+      document.getElementById('sumPeriod').textContent = period;
+      document.getElementById('sumTotal').textContent = price === '0' ? 'Gratuit' : price + ' XAF';
+    }
+    function selectMethod(el) {
+      document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+    function handlePayment() {
+      // fetch('/api/subscription/pay/', { method: 'POST', ... })
+      alert('Redirection vers le paiement...');
+    }
+  </script>
+</body>
+</html>

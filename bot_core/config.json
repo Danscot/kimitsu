@@ -1,0 +1,49 @@
+{
+  "users": {
+    "237691770822": {
+      "prefix": "",
+      "antidel": "on",
+      "respons": false,
+      "public": false,
+      "sudo": [
+        "143332252590177"
+      ],
+      "start": "1771949416506",
+      "autoResponse": {
+        "enabled": true,
+        "message": {
+          "videoMessage": {
+            "url": "https://mmg.whatsapp.net/v/t62.7161-24/535141015_27120469544220038_6596714672888130307_n.enc?ccb=11-4&oh=01_Q5Aa3wGzfZyk6FSNE9BaPlG8KUoib_UnVi6pf49AtJkBQSh5AQ&oe=69C56C4E&_nc_sid=5e03e0&mms3=true",
+            "mimetype": "video/mp4",
+            "fileSha256": "0LOtgH3sv3AcpPsSbHU51gkxDS+hFPFEZ8OQ1osMsJw=",
+            "fileLength": "1381535",
+            "seconds": 12,
+            "mediaKey": "Asx3dZz7NWPJlgVVjif52iCzwCx/cEiNF8muGg1pJa8=",
+            "height": 640,
+            "width": 360,
+            "fileEncSha256": "EghAsUrDrNNdqOwr9t4kRgCgSu2kuQou/8/AO0f8pEU=",
+            "directPath": "/v/t62.7161-24/535141015_27120469544220038_6596714672888130307_n.enc?ccb=11-4&oh=01_Q5Aa3wGzfZyk6FSNE9BaPlG8KUoib_UnVi6pf49AtJkBQSh5AQ&oe=69C56C4E&_nc_sid=5e03e0",
+            "mediaKeyTimestamp": "1771954410",
+            "jpegThumbnail": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEABsbGxscGx4hIR4qLSgtKj04MzM4PV1CR0JHQl2NWGdYWGdYjX2Xe3N7l33gsJycsOD/2c7Z//////////////8BGxsbGxwbHiEhHiotKC0qPTgzMzg9XUJHQkdCXY1YZ1hYZ1iNfZd7c3uXfeCwnJyw4P/Zztn////////////////CABEIAEgAKQMBIgACEQEDEQH/xAArAAEBAQEBAAAAAAAAAAAAAAAAAQIDBQEBAQAAAAAAAAAAAAAAAAAAAAH/2gAMAwEAAhADEAAAAPH4cKRqmGoRqFsqpQyJUq1BALBZYQIAB//EAB8QAAICAgEFAAAAAAAAAAAAAAERAgMAIBAEEyIwQP/aAAgBAQABPwDu9MalKHmkMsnUQBGtFbjg6DlYvU8ei+X/xAAUEQEAAAAAAAAAAAAAAAAAAAAw/9oACAECAQE/AH//xAAUEQEAAAAAAAAAAAAAAAAAAAAw/9oACAEDAQE/AH//2Q==",
+            "contextInfo": {
+              "forwardingScore": 0,
+              "featureEligibilities": {
+                "canBeReshared": true
+              },
+              "pairedMediaType": "NOT_PAIRED_MEDIA",
+              "statusSourceType": "VIDEO"
+            },
+            "streamingSidecar": "dxKrngZeIBi2MCMoIQYb7MWUsq2JgdwAIZH23kLQ4aH2f0ZFVt5UHeoZwyj52s8NfX9IPJfwycmeNujkad8/fdAl8Qjp4q+ABEheSlNLnf1NS816CC/yE2M3DYIlCQteuZJiG/q4DZU22J23Idj5rXSHT2czswOY0Bm7MTd6lUQj5Clp9lqmhfG1J2viTQUklopGUKSAEdI6PXFcUVrP/rE0dmcxsZmFhFQpNB7MhuFTABW4S7cHLSmAbGDyPUs/aEdPogN777uyYx+UZcMZSBE7K/ySZalhq4RzRg=="
+          }
+        }
+      }
+    },
+    "237670701984": {
+      "prefix": "/",
+      "antidel": false,
+      "respons": false,
+      "public": false,
+      "start": "1771949416506"
+    }
+  }
+}

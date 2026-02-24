@@ -1,0 +1,94 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connexion — Kimitsu</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+ 
+  <style>
+    .auth-left::before {
+      background: radial-gradient(ellipse, rgba(155,133,212,0.15) 0%, transparent 70%);
+    }
+    .trial-badge {
+      background: rgba(155,133,212,0.08);
+      border: 1px solid rgba(155,133,212,0.18);
+      border-radius: 2px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.8rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+    }
+    .trial-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lavender); margin-top: 5px; flex-shrink: 0; }
+    .trial-text { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+    .trial-text strong { color: var(--lavender); font-weight: 400; }
+    .forgot { font-size: 0.78rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .forgot:hover { color: var(--lavender); }
+  </style>
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="auth-left">
+      <a class="nav-logo" href="{% url 'index' %}">Kimitsu</a>
+      <div class="auth-left-content">
+        <h1 class="auth-left-title">Bon retour<br /><em>parmi nous.</em></h1>
+        <p class="auth-left-sub">Kimitsu t'attend. Connecte-toi et retrouve ton assistant WhatsApp personnel.</p>
+      </div>
+      <div class="auth-left-footer">© 2026 Kimitsu by Danscot</div>
+    </div>
+    <div class="auth-right">
+      <div class="auth-form-wrap">
+        <h2 class="auth-form-title">Se connecter</h2>
+        <p class="auth-form-sub">Pas encore de compte ? <a href="{% url 'signup' %}">S'inscrire gratuitement</a></p>
+
+        <div class="alert alert-error" id="loginError" style="display:none;">
+          Email ou mot de passe incorrect.
+        </div>
+
+        <form method="post" onsubmit="handleLogin(event)">
+          {% csrf_token %}
+          <div class="field">
+            <label for="id_email">Adresse email</label>
+            <input type="email" id="id_email" name="email" placeholder="toi@email.com" required />
+          </div>
+          <div class="field">
+            <label for="id_password">Mot de passe</label>
+            <input type="password" id="id_password" name="password" placeholder="••••••••" required />
+          </div>
+          <a class="forgot" href="#">Mot de passe oublié ?</a>
+          <button type="submit" class="submit-btn">Se connecter</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function handleLogin(e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      fetch("{% url 'login' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+        },
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          window.location.href = "{% url 'profile' %}";
+        } else {
+          document.getElementById('loginError').style.display = 'block';
+        }
+      })
+      .catch(error => {
+        document.getElementById('loginError').style.display = 'block';
+      });
+    }
+  </script>
+</body>
+</html>

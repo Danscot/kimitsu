@@ -1,0 +1,213 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mon compte — Kimitsu</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+   <style>
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+
+    .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .info-card.accent::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--lavender-deep), var(--magenta));
+    }
+
+    .plan-highlight {
+      padding: 2rem 1.8rem;
+    }
+
+    .plan-highlight-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 300;
+      color: var(--lavender);
+      margin-bottom: 0.3rem;
+    }
+
+    .plan-highlight-price {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .plan-highlight-price strong {
+      color: var(--text);
+      font-weight: 400;
+    }
+
+    .actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 2.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .profile-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="nav-logo" href="{% url 'index' %}">Kimitsu</a>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="{% url 'profile' %}" class="active">Mon compte</a></li>
+        <li><a href="{% url 'pairing' %}">Connexion</a></li>
+        <li><a href="{% url 'subscription' %}">Abonnement</a></li>
+      </ul>
+      <a class="logout-btn" href="#">Déconnexion</a>
+    </div>
+    <div class="hamburger" onclick="toggleMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="{% url 'profile' %}" onclick="toggleMenu()">Mon compte</a>
+    <a href="{% url 'pairing' %}" onclick="toggleMenu()">Connexion</a>
+    <a href="{% url 'subscription' %}" onclick="toggleMenu()">Abonnement</a>
+    <a href="#">Déconnexion</a>
+  </div>
+
+  <div class="page">
+    <p class="section-label">Tableau de bord</p>
+    <h1 class="section-title">Mon compte</h1>
+
+    <div class="profile-grid">
+      <!-- User info -->
+      <div class="info-card">
+        <div class="info-card-header">
+          <span class="info-card-title">Informations personnelles</span>
+        </div>
+        <div class="info-rows">
+          <div class="info-row">
+            <span class="info-row-label">Nom</span>
+            <span class="info-row-value">{{ user.get_full_name|default:"Danscot Dev" }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-row-label">Email</span>
+            <span class="info-row-value">
+              <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-row-label">Numéro lié</span>
+            <span class="info-row-value">
+              {% if user.phone_number %}
+                {{ user.phone_number|slice:":3" }} ••• •••
+              {% else %}
+                Aucun numéro lié
+              {% endif %}
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-row-label">Membre depuis</span>
+            <span class="info-row-value">{{ user.date_joined|date:"F Y" }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-row-label">Statut WhatsApp</span>
+            <span class="info-row-value">
+              <span class="badge badge-active">
+                <span class="badge-dot badge-dot-pulse"></span> Connecté
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subscription info -->
+      <div class="info-card accent">
+        <div class="plan-highlight">
+          <div class="info-card-title" style="margin-bottom:1.2rem;">Abonnement actuel</div>
+          <div class="plan-highlight-name">
+            {% if user.subscription_plan %}
+              {{ user.subscription_plan|title }}
+            {% else %}
+              Aucun
+            {% endif %}
+          </div>
+          <div class="plan-highlight-price">
+            {% if user.subscription_plan %}
+              {% if user.subscription_plan == "bimensuel" %}
+                500 XAF
+              {% elif user.subscription_plan == "mensuel" %}
+                1000 XAF
+              {% endif %}
+              — <strong>Expire le {{ user.subscription_end|date:"j F Y" }}</strong>
+            {% else %}
+              Aucun abonnement actif
+            {% endif %}
+          </div>
+          {% if user.subscription_plan %}
+            <span class="badge badge-active">
+              <span class="badge-dot badge-dot-pulse"></span> Actif
+            </span>
+          {% endif %}
+        </div>
+        <div class="info-rows">
+          {% if user.subscription_plan %}
+            <div class="info-row">
+              <span class="info-row-label">Durée</span>
+              <span class="info-row-value">
+                {% if user.subscription_plan == "bimensuel" %}
+                  14 Jours
+                {% elif user.subscription_plan == "mensuel" %}
+                  30 Jours
+                {% endif %}
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-row-label">Prochain renouvellement</span>
+              <span class="info-row-value">{{ user.subscription_end|date:"j M Y" }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-row-label">Mode de paiement</span>
+              <span class="info-row-value">
+                {% if user.payment_method %}
+                  {{ user.payment_method|title }}
+                {% else %}
+                  Non défini
+                {% endif %}
+              </span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a class="btn-primary" href="{% url 'subscription' %}">Changer de plan</a>
+      <a class="btn-ghost" href="{% url 'pairing' %}">Gérer la connexion</a>
+      <button class="btn-danger" onclick="confirmLogout()">Se déconnecter</button>
+    </div>
+  </div>
+
+  <script>
+
+    function toggleMenu() { document.getElementById('mobileMenu').classList.toggle('open'); }
+
+  </script>
+</body>
+</html>

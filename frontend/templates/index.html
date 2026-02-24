@@ -1,0 +1,562 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Kimitsu — Mini bot WhatsApp</title>
+
+  <link rel="stylesheet" href="{% static '/css/style.css' %}">
+
+
+  <style>
+    nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      width: 100%;
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 8rem 2rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -40%; right: -20%;
+      width: 70vw; height: 70vw;
+      background: radial-gradient(ellipse, rgba(155,133,212,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -30%; left: -10%;
+      width: 50vw; height: 50vw;
+      background: radial-gradient(ellipse, rgba(232,100,154,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--magenta);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease forwards 0.2s;
+    }
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 10vw, 7.5rem);
+      font-weight: 300;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      max-width: 900px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 0.4s;
+    }
+    .hero h1 em { font-style: italic; color: var(--lavender); }
+    .hero-sub {
+      margin-top: 2rem;
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 480px;
+      line-height: 1.7;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 0.6s;
+    }
+    .hero-actions {
+      margin-top: 3rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 0.8s;
+    }
+    .hero-scroll {
+      position: absolute;
+      bottom: 2rem; left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      animation: fadeIn 1s ease forwards 1.5s;
+      opacity: 0;
+    }
+    .scroll-line {
+      width: 1px; height: 40px;
+      background: linear-gradient(to bottom, var(--muted), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    .strip {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .strip::-webkit-scrollbar { display: none; }
+    .strip-item {
+      flex: 1; min-width: 180px;
+      padding: 1.4rem 2rem;
+      border-right: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .strip-item:last-child { border-right: none; }
+    .strip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--magenta); flex-shrink: 0; }
+    .strip-text { font-size: 0.78rem; letter-spacing: 0.06em; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
+
+    section { padding: 6rem 2rem; }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .about-text p { color: var(--muted); line-height: 1.8; margin-bottom: 1.2rem; font-size: 0.95rem; }
+
+    .kimitsu-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .kimitsu-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--lavender-deep), var(--magenta));
+    }
+    .kimitsu-name { font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; font-weight: 600; color: var(--lavender); margin-bottom: 0.3rem; }
+    .kimitsu-tagline { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 2rem; }
+    .kimitsu-features { list-style: none; display: flex; flex-direction: column; gap: 0.8rem; }
+    .kimitsu-features li { font-size: 0.88rem; color: var(--text); display: flex; align-items: center; gap: 0.8rem; }
+    .kimitsu-features li::before { content: ''; display: block; width: 18px; height: 1px; background: var(--lavender-deep); flex-shrink: 0; }
+
+    .how-bg { background: var(--bg2); }
+
+    .steps {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+    .step {
+      padding: 2rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--surface);
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .step:hover { border-color: var(--lavender-deep); transform: translateY(-4px); }
+    .step-num { font-family: 'Cormorant Garamond', serif; font-size: 3.5rem; font-weight: 300; color: rgba(196,181,232,0.15); line-height: 1; margin-bottom: 1.2rem; }
+    .step-title { font-size: 1rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--lavender); }
+    .step-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+
+    .pricing-grid {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .plan {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2rem;
+      background: var(--surface);
+      transition: border-color 0.3s, transform 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .plan:hover { transform: translateY(-4px); }
+    .plan.featured { border-color: var(--lavender-deep); }
+    .plan.featured::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--lavender-deep), var(--magenta)); }
+    .plan-name { font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
+    .plan-price { font-family: 'Cormorant Garamond', serif; font-size: 3rem; font-weight: 300; line-height: 1; margin-bottom: 0.3rem; }
+    .plan-price span { font-size: 1rem; color: var(--muted); font-family: 'DM Sans', sans-serif; }
+    .plan-period { font-size: 0.78rem; color: var(--muted); margin-bottom: 2rem; }
+    .plan-divider { height: 1px; background: var(--border); margin-bottom: 1.5rem; }
+    .plan-features { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 2rem; }
+    .plan-features li { font-size: 0.85rem; color: var(--muted); display: flex; align-items: center; gap: 0.6rem; }
+    .plan-features li::before { content: ''; display: block; width: 14px; height: 1px; background: var(--lavender); flex-shrink: 0; }
+    .plan-btn {
+      display: block; text-align: center;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--lavender);
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+    .plan.featured .plan-btn { background: var(--lavender-deep); border-color: var(--lavender-deep); color: #fff; }
+    .plan-btn:hover { background: var(--magenta); border-color: var(--magenta); color: #fff; }
+
+    .about-dev { background: var(--bg2); border-top: 1px solid var(--border); }
+    .about-dev-inner { max-width: 700px; margin: 0 auto; }
+    .dev-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 300;
+      line-height: 1.5;
+      border-left: 2px solid var(--lavender-deep);
+      padding-left: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .dev-bio { font-size: 0.92rem; color: var(--muted); line-height: 1.8; margin-bottom: 1.2rem; }
+    .dev-name { font-size: 0.78rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--lavender); }
+    .dev-contact-link {
+      display: inline-block;
+      font-size: 0.85rem;
+      color: var(--lavender);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(196,181,232,0.3);
+      padding-bottom: 2px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .dev-contact-link:hover { color: var(--magenta); border-color: var(--magenta); }
+
+    /* Commands section */
+    .cmd-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 0.5rem;
+    }
+    .cmd-category {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .cmd-cat-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--magenta);
+      padding: 1rem 1.4rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .cmd-list { padding: 0.4rem 0; }
+    .cmd-row {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      padding: 0.6rem 1.4rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .cmd-row:last-child { border-bottom: none; }
+    .cmd-row:hover { background: rgba(196,181,232,0.04); }
+    .cmd-tag {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      color: var(--lavender);
+      white-space: nowrap;
+      flex-shrink: 0;
+      font-weight: 400;
+    }
+    .cmd-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    @media (max-width: 768px) {
+      .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .steps { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .cmd-grid { grid-template-columns: 1fr; }
+      section { padding: 4rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+
+    <a class="nav-logo" href="{% url 'index' %}">Kimitsu</a>
+
+    <div class="nav-right">
+
+      <ul class="nav-links">
+
+        <li><a href="#comment">Comment ça marche</a></li>
+
+        <li><a href="#commandes">Commandes</a></li>
+
+        <li><a href="#tarifs">Tarifs</a></li>
+
+        <li><a href="#about">À propos</a></li>
+
+      </ul>
+
+      <a class="nav-cta" href="{% url 'login' %}">Commencer</a>
+
+    </div>
+
+    <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+
+    <a href="#comment" onclick="toggleMenu()">Comment ça marche</a>
+
+    <a href="#commandes" onclick="toggleMenu()">Commandes</a>
+
+    <a href="#tarifs" onclick="toggleMenu()">Tarifs</a>
+
+    <a href="#about" onclick="toggleMenu()">À propos</a>
+
+    <a class="nav-cta" href="{% url 'login' %}">Commencer</a>
+
+  </div>
+
+  <section class="hero">
+
+    <p class="hero-label">Mini Bot WhatsApp — Kimitsu</p>
+
+    <h1>Fait passer ton.<br /><em>Whatsapp.</em><br />Au niveau supérieur.</h1>
+
+    <p class="hero-sub">Kimitsu est un mini bot WhatsApp qui te permet de gérer les médias, les groupes et d'utiliser des commandes puissantes directement depuis tes conversations.</p>
+
+    <div class="hero-actions">
+
+      <a class="btn-primary" href="{% url 'login' %}">Essayer gratuitement</a>
+
+      <a class="btn-ghost" href="#commandes">Voir les commandes</a>
+
+    </div>
+
+  </section>
+
+  <section id="bot">
+
+    <div class="about-grid">
+
+      <div class="about-text">
+
+        <p class="section-label">Le bot</p>
+
+        <h2 class="section-title">Rencontre Kimitsu.</h2>
+
+        <p>Kimitsu est un mini bot WhatsApp conçu pour simplifier ta vie dans les groupes et les conversations. Médias, tags, téléchargements, réponses automatiques — tout se contrôle avec de simples commandes.</p>
+        <p>Connecte ton numéro une seule fois, et le bot s'active automatiquement. Pas de configuration complexe, pas d'application à installer.</p>
+      </div>
+
+      <div class="kimitsu-card">
+
+        <div class="kimitsu-name">Kimitsu</div>
+
+        <div class="kimitsu-tagline">Mini Bot WhatsApp</div>
+
+        <ul class="kimitsu-features">
+
+          <li>Contourner et sauvegarder les vues uniques</li>
+          <li>Télécharger depuis YouTube et TikTok</li>
+          <li>Taguer tous les membres d'un groupe</li>
+          <li>Créer des stickers instantanément</li>
+          <li>Réponses automatiques configurables</li>
+          <li>Récupérer les messages supprimés</li>
+
+        </ul>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <section class="how-bg" id="comment">
+    <div style="max-width:900px;margin:0 auto;">
+      <p class="section-label">Processus</p>
+      <h2 class="section-title">Prêt en trois étapes.</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-title">Crée ton compte</div>
+          <p class="step-desc">Inscris-toi sur bot.danscot.dev en quelques secondes. Aucune carte bancaire pour l'essai gratuit.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-title">Connecte ton numéro</div>
+          <p class="step-desc">Suis le tutoriel de connexion : entre ton numéro WhatsApp et entre le code reçu pour lier le bot.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-title">Le bot s'active</div>
+          <p class="step-desc">Une fois connecté, ton numéro a le bot activé automatiquement. Tape une commande et Kimitsu répond.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="commandes">
+    <div style="max-width:960px;margin:0 auto;">
+      <p class="section-label">Fonctionnalités</p>
+      <h2 class="section-title">Les commandes principales.</h2>
+      <div class="cmd-grid">
+
+        <div class="cmd-category">
+          <div class="cmd-cat-label">Médias</div>
+          <div class="cmd-list">
+            <div class="cmd-row"><span class="cmd-tag">/vv</span><span class="cmd-desc">Contourner les vues uniques</span></div>
+            <div class="cmd-row"><span class="cmd-tag">/save</span><span class="cmd-desc">Sauvegarder les médias dans tes MP, même les vues uniques</span></div>
+            <div class="cmd-row"><span class="cmd-tag">/sticker</span><span class="cmd-desc">Créer des stickers depuis une image ou vidéo</span></div>
+          </div>
+        </div>
+
+        <div class="cmd-category">
+          <div class="cmd-cat-label">Tags</div>
+          <div class="cmd-list">
+            <div class="cmd-row"><span class="cmd-tag">/tag</span><span class="cmd-desc">Mentionner tous les membres sur un message spécifique</span></div>
+            <div class="cmd-row"><span class="cmd-tag">/tagall</span><span class="cmd-desc">Tagger tous les utilisateurs du groupe</span></div>
+            <div class="cmd-row"><span class="cmd-tag">/tagadmin</span><span class="cmd-desc">Tagger uniquement les administrateurs</span></div>
+          </div>
+        </div>
+
+        <div class="cmd-category">
+          <div class="cmd-cat-label">Téléchargeur</div>
+          <div class="cmd-list">
+            <div class="cmd-row"><span class="cmd-tag">/play</span><span class="cmd-desc">Télécharger de l'audio depuis YouTube</span></div>
+            <div class="cmd-row"><span class="cmd-tag">/tiktok</span><span class="cmd-desc">Télécharger des vidéos TikTok sans filigrane</span></div>
+          </div>
+        </div>
+
+        <div class="cmd-category">
+          <div class="cmd-cat-label">Configuration</div>
+          <div class="cmd-list">
+            <div class="cmd-row"><span class="cmd-tag">/setprefix</span><span class="cmd-desc">Modifier le préfixe des commandes</span></div>
+            <div class="cmd-row"><span class="cmd-tag">/antidel</span><span class="cmd-desc">Activer ou désactiver la récupération des messages supprimés</span></div>
+            <div class="cmd-row"><span class="cmd-tag">/settag</span><span class="cmd-desc">Définir le message automatique lors des tags</span></div>
+            <div class="cmd-row"><span class="cmd-tag">/public</span><span class="cmd-desc">Activer ou désactiver le mode public</span></div>
+            <div class="cmd-row"><span class="cmd-tag">/respons on</span><span class="cmd-desc">Activer la réponse automatique définie par /settag</span></div>
+            <div class="cmd-row"><span class="cmd-tag">/respons off</span><span class="cmd-desc">Désactiver la réponse automatique</span></div>
+            <div class="cmd-row"><span class="cmd-tag">/status</span><span class="cmd-desc">Voir l'état du bot et le temps de fonctionnement</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section id="tarifs">
+    <div style="max-width:900px;margin:0 auto;">
+      <p class="section-label">Tarifs</p>
+      <h2 class="section-title">Simple et transparent.</h2>
+      <div class="pricing-grid">
+        <div class="plan">
+          <div class="plan-name">Essai</div>
+          <div class="plan-price">0 <span>XAF</span></div>
+          <div class="plan-period">24 heures</div>
+          <div class="plan-divider"></div>
+          <ul class="plan-features">
+            <li>Accès complet pendant 1 jour</li>
+            <li>Sans engagement</li>
+            <li>Aucune carte requise</li>
+          </ul>
+          <a class="plan-btn" href="{% url 'login' %}">Commencer</a>
+        </div>
+        <div class="plan featured">
+          <div class="plan-name">Bimensuel</div>
+          <div class="plan-price">500 <span>XAF</span></div>
+          <div class="plan-period">2 semaines d'accès</div>
+          <div class="plan-divider"></div>
+          <ul class="plan-features">
+            <li>Accès complet</li>
+            <li>Support disponible</li>
+            <li>Renouvellement simple</li>
+          </ul>
+          <a class="plan-btn" href="{% url 'subscription' %}">S'abonner</a>
+        </div>
+        <div class="plan">
+          <div class="plan-name">Mensuel</div>
+          <div class="plan-price">1000 <span>XAF</span></div>
+          <div class="plan-period">1 mois d'accès</div>
+          <div class="plan-divider"></div>
+          <ul class="plan-features">
+            <li>Accès complet</li>
+            <li>Meilleur rapport qualité/prix</li>
+            <li>Support prioritaire</li>
+          </ul>
+          <a class="plan-btn" href="{% url 'subscription' %}">S'abonner</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="about-dev" id="about">
+    <div class="about-dev-inner">
+      <p class="section-label">Le développeur</p>
+      <blockquote class="dev-quote">"Je construis des systèmes qui fonctionnent, simplement."</blockquote>
+      <p class="dev-bio">Danscot est un jeune développeur passionné par la création de systèmes qui fonctionnent vraiment. Kimitsu en est la preuve — un outil concret, accessible, conçu pour les utilisateurs WhatsApp du quotidien.</p>
+      <p class="dev-bio">Pour tout problème ou question, contacte l'administrateur directement sur WhatsApp.</p>
+      <div class="dev-contact">
+        <a href="https://wa.me/237670701984" class="dev-contact-link" target="_blank">+237 670 701 984 — @danscot</a>
+      </div>
+      <div class="dev-name" style="margin-top:1.5rem;">Danscot — Développeur</div>
+    </div>
+  </section>
+
+  <footer>
+    <a class="footer-logo" href="{% url 'index' %}">Kimitsu</a>
+    <ul class="footer-links">
+      <li><a href="{% url 'signup' %}">Inscription</a></li>
+      <li><a href="{% url 'login' %}">Connexion</a></li>
+      <li><a href="{% url 'subscription' %}">Tarifs</a></li>
+    </ul>
+    <p class="footer-copy">© 2026 Kimitsu by Danscot</p>
+  </footer>
+
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById('mobileMenu');
+      const burger = document.querySelector('.hamburger');
+      menu.classList.toggle('open');
+      burger.classList.toggle('open');
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.style.opacity = '1'; e.target.style.transform = 'translateY(0)'; }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.step, .plan, .kimitsu-card').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>

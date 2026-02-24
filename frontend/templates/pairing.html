@@ -1,0 +1,354 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connexion WhatsApp — Kimitsu</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+ <style>
+    .page-inner {
+      max-width: 520px;
+    }
+
+    .pairing-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      margin-top: 2.5rem;
+    }
+
+    .pairing-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--lavender-deep), var(--magenta));
+    }
+
+    .pairing-card .field input {
+      background: var(--surface2);
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+    }
+
+    .pairing-hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+      line-height: 1.5;
+    }
+
+    /* Popup modal specifics */
+    .code-display {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin: 2rem 0 0.5rem;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+
+    .code-cell {
+      width: 44px;
+      height: 56px;
+      flex-shrink: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem;
+      font-weight: 300;
+      color: var(--lavender);
+      transition: border-color 0.3s;
+    }
+
+    .code-cell.revealed {
+      border-color: var(--lavender-deep);
+      animation: cellPop 0.3s ease forwards;
+    }
+
+    @keyframes cellPop {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      margin: 1rem 0 0.5rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--muted);
+      padding: 0.65rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover { border-color: var(--lavender-deep); color: var(--lavender); }
+    .copy-btn.copied { border-color: var(--success); color: var(--success); }
+
+    .modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      font-weight: 300;
+      margin-bottom: 0.4rem;
+    }
+
+    .modal-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .modal-instruction {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .modal-instruction strong {
+      color: var(--text);
+      font-weight: 400;
+    }
+
+    .modal-timer {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .modal-timer span {
+      color: var(--lavender);
+    }
+
+    .modal-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 1.5rem 0;
+    }
+
+    .modal .submit-btn {
+      margin-top: 1rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .modal .submit-btn:hover {
+      background: transparent;
+      border-color: var(--lavender-deep);
+      color: var(--lavender);
+      transform: none;
+    }
+
+    /* Loading state on button */
+    .pairing-card .submit-btn {
+      position: relative;
+    }
+
+    .btn-spinner {
+      display: none;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+
+    .pairing-card .submit-btn.loading .btn-text { display: none; }
+    .pairing-card .submit-btn.loading .btn-spinner { display: block; }
+  </style>
+
+</head>
+<body>
+  <nav>
+    <a class="nav-logo" href="{% url 'index' %}">Kimitsu</a>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="{% url 'profile' %}">Mon compte</a></li>
+        <li><a href="{% url 'pairing' %}" class="active">Connexion</a></li>
+        <li><a href="{% url 'subscription' %}">Abonnement</a></li>
+      </ul>
+      <a class="logout-btn" href="">Déconnexion</a>
+    </div>
+    <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="{% url 'profile' %}" onclick="toggleMenu()">Mon compte</a>
+    <a href="{% url 'pairing' %}" onclick="toggleMenu()">Connexion</a>
+    <a href="{% url 'subscription' %}" onclick="toggleMenu()">Abonnement</a>
+    <a href="">Déconnexion</a>
+  </div>
+
+  <div class="page">
+    <div class="page-inner">
+      <p class="section-label">Connexion WhatsApp</p>
+      <h1 class="section-title">Connecte ton numéro.</h1>
+      <p class="section-sub">Entre ton numéro WhatsApp ci-dessous. Tu recevras un code de connexion à entrer directement dans l'application.</p>
+
+      <div class="pairing-card">
+        <form onsubmit="requestCode(event)">
+          <div class="field">
+            <label>Numéro WhatsApp</label>
+            <input type="tel" id="phoneInput" placeholder="+237 6•• ••• •••" required />
+            <p class="pairing-hint">Inclure l'indicatif du pays. Exemple : +237 655 123 456</p>
+          </div>
+          <button class="submit-btn" id="pairBtn" type="submit">
+            <span class="btn-text">Obtenir mon code</span>
+            <span class="btn-spinner"></span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pairing code popup -->
+  <div class="overlay" id="codeOverlay">
+    <div class="modal card card-accent">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-title">Ton code de connexion</div>
+      <p class="modal-sub">Entre ce code dans WhatsApp pour lier Kimitsu à ton numéro.</p>
+
+      <div class="code-display" id="codeDisplay">
+        <div class="code-cell" id="c0"></div>
+        <div class="code-cell" id="c1"></div>
+        <div class="code-cell" id="c2"></div>
+        <div class="code-cell" id="c3"></div>
+        <div class="code-cell" id="c4"></div>
+        <div class="code-cell" id="c5"></div>
+        <div class="code-cell" id="c6"></div>
+        <div class="code-cell" id="c7"></div>
+      </div>
+
+      <button class="copy-btn" id="copyBtn" onclick="copyCode()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copier le code
+      </button>
+
+      <p class="modal-instruction">
+        Ouvre <strong>WhatsApp</strong> &rarr; Paramètres &rarr; Appareils liés &rarr; Lier un appareil &rarr; Entrer le code manuellement.
+      </p>
+
+      <div class="modal-divider"></div>
+
+      <div class="modal-timer">Code valide encore <span id="timerDisplay">05:00</span></div>
+
+      <button class="submit-btn" onclick="closeModal()">Fermer</button>
+    </div>
+  </div>
+
+  <script>
+    function toggleMenu() { document.getElementById('mobileMenu').classList.toggle('open'); }
+
+    let currentCode = '';
+    let timerInterval;
+
+    function requestCode(e) {
+      e.preventDefault();
+      const btn = document.getElementById('pairBtn');
+      btn.classList.add('loading');
+      // fetch('/api/pairing/request/', { method: 'POST', body: JSON.stringify({ phone: document.getElementById('phoneInput').value }) })
+      setTimeout(() => {
+        btn.classList.remove('loading');
+        currentCode = generateCode();
+        showCode(currentCode);
+      }, 1600);
+    }
+
+    function generateCode() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      return Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    }
+
+    function showCode(code) {
+      document.getElementById('codeOverlay').classList.add('open');
+      // Reset copy btn
+      const copyBtn = document.getElementById('copyBtn');
+      copyBtn.classList.remove('copied');
+      copyBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copier le code`;
+
+      code.split('').forEach((char, i) => {
+        setTimeout(() => {
+          const cell = document.getElementById('c' + i);
+          cell.textContent = char;
+          cell.classList.add('revealed');
+        }, i * 80);
+      });
+
+      startTimer(5 * 60);
+    }
+
+    function copyCode() {
+      if (!currentCode) return;
+      navigator.clipboard.writeText(currentCode).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.classList.add('copied');
+        btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copié !`;
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copier le code`;
+        }, 2000);
+      });
+    }
+
+    function startTimer(seconds) {
+      clearInterval(timerInterval);
+      let remaining = seconds;
+      updateTimer(remaining);
+      timerInterval = setInterval(() => {
+        remaining--;
+        updateTimer(remaining);
+        if (remaining <= 0) {
+          clearInterval(timerInterval);
+          document.getElementById('timerDisplay').textContent = 'Expiré';
+          document.getElementById('timerDisplay').style.color = 'var(--error)';
+        }
+      }, 1000);
+    }
+
+    function updateTimer(seconds) {
+      const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+      const s = String(seconds % 60).padStart(2, '0');
+      document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+    }
+
+    function closeModal() {
+      document.getElementById('codeOverlay').classList.remove('open');
+      clearInterval(timerInterval);
+      for (let i = 0; i < 8; i++) {
+        const cell = document.getElementById('c' + i);
+        cell.textContent = '';
+        cell.classList.remove('revealed');
+      }
+      document.getElementById('timerDisplay').style.color = '';
+    }
+
+    document.getElementById('codeOverlay').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+  </script>
+</body>
+</html>
