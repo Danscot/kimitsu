@@ -66,27 +66,48 @@
   </div>
 
   <script>
+
     function handleLogin(e) {
+
       e.preventDefault();
+
       const form = e.target;
+
       const formData = new FormData(form);
-      fetch("{% url 'login' %}", {
+
+      fetch("{% url 'login_api' %}", {
+
         method: 'POST',
+
         body: formData,
+
         headers: {
+
           'X-CSRFToken': '{{ csrf_token }}',
         },
+
       })
+
       .then(response => response.json())
+
       .then(data => {
-        if (data.success) {
+
+        if (data.status == "ok") {
+
           window.location.href = "{% url 'profile' %}";
+
         } else {
+
           document.getElementById('loginError').style.display = 'block';
+
         }
+
       })
+
       .catch(error => {
+
         document.getElementById('loginError').style.display = 'block';
+
       });
     }
   </script>

@@ -24,4 +24,6 @@ urlpatterns = [
 
     path('', include('frontend.urls')),  
 
+    path('', include('auth_sys.urls'))
+
 ]

@@ -39,7 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'frontend'
+    'frontend',
+    'auth_sys',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -70,6 +72,9 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'kimitsu.wsgi.application'
+
+
+AUTH_USER_MODEL = "auth_sys.CustomUser"
 
 
 # Database
