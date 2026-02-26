@@ -10,6 +10,6 @@ urlpatterns = [
 
     path('list/', views.list_sessions, name="list"),
 
-    path('pair/', views.pairing, name="pairing")
+    path('pair/', views.pairing, name="pairing_url")
 
 ]

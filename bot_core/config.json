@@ -44,6 +44,18 @@
       "respons": false,
       "public": false,
       "start": "1771949416506"
+    },
+    "13438827135": {
+      "prefix": "/",
+      "antidel": false,
+      "respons": false,
+      "public": false,
+      "sudo": [],
+      "starttime": 1772068380512,
+      "autoresponse": {
+        "enabled": false,
+        "message": null
+      }
     }
   }
 }
