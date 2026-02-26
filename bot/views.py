@@ -20,29 +20,38 @@ import re
 
 import time
 
-from auth_sys.models import CustomUser
-
 # ----------------------------
 # Utility functions
 # ----------------------------
 def clean_number(raw: str) -> str:
 
     cleaned = re.sub(r"[ \+\-\(\)]", "", raw)
-    
+
     if not cleaned.isdigit():
 
         raise ValidationError("Invalid number: must contain digits only")
-    
+
     if len(cleaned) < 7 or len(cleaned) > 15:
 
         raise ValidationError("Invalid number: length must be between 7 and 15 digits")
-    
+
     return cleaned
+
 
 def to_gb(bytes_value):
 
     return round(bytes_value / (1024 ** 3), 2)  # Convert bytes → GB
 
+
+def get_user(username):
+
+    user = CustomUser.objects.filter(username=username).first()
+
+    if not user:
+
+        return 0  # or None
+
+    return user
 
 # ----------------------------
 # ----------------------------
@@ -54,17 +63,31 @@ def root(request):
     return Response({"status": "Ok", "message": "Bot API System Is Running"})
 
 @api_view(["POST"])
+# ----------------------------
+# Pairing view
+# ----------------------------
+
+@api_view(["POST"])
 
 def pairing(request):
 
-    target = clean_number(request.data.get("number"))
+    target = request.data.get("number")
 
     if not target:
 
         return Response(
+            {"status": "Failed", "message": "Missing number"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-            {"status": "Failed", "message": "Missing username or number"},
+    try:
 
+        target = clean_number(target)
+
+    except ValidationError as e:
+
+        return Response(
+            {"status": "Failed", "message": str(e)},
             status=status.HTTP_400_BAD_REQUEST
         )
 
@@ -73,102 +96,70 @@ def pairing(request):
     if not user:
 
         return Response(
-
             {"status": "Failed", "message": "User not found"},
-
             status=status.HTTP_404_NOT_FOUND
         )
 
-    duration = int(time.time()) + 172800
+    # Check subscription properly
+    if not user.is_subscription_active:
 
-    dt = datetime.fromtimestamp(duration)
+        return Response(
 
-    formatted = dt.strftime("%Y-%m-%d %H:%M:%S")
+            {"status": "Failed", "message": "Vous devez activez un abonnement pour continuer."},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    duration = int(time.time()) + 172800  # 48 hours from now
 
     bot_name = f"session-{target}"
 
     bot_path = "web-paire.js"
 
+    # Use full path to PM2 to avoid shell "not found" issues
+    pm2_path = "/usr/local/bin/pm2"
+
     cmd = (
 
         f'NUMBER="{target}" '
-
         f'PM2_PROCESS_NAME="{bot_name}" '
-
         f'DURATION="{duration}" '
-
-        f'pm2 start {bot_path} --name "{bot_name}"'
+        f'{pm2_path} start {bot_path} --name "{bot_name}"'
     )
 
     try:
 
         with transaction.atomic():
-
-            # Spend coins safely
-            if not user.is_subscription_active:
-
-                return Response(
-
-                    {
-                        "status": "Failed",
-
-                        "message": "Vous devez activez un abonnement pour continuer."
-                    },
-
-                    status=status.HTTP_403_FORBIDDEN
-                )
-
+        	
             result = subprocess.run(
-
                 cmd,
-
                 shell=True,
-
                 cwd="bot_core",
-
                 capture_output=True,
-
                 text=True
             )
 
             if result.returncode != 0:
 
-                raise RuntimeError(result.stderr)
-
+                raise RuntimeError(result.stderr.strip())
     except Exception as e:
-
         return Response(
-
-            {
-                "status": "Error",
-
-                "message": str(e)
-            },
-
+            {"status": "Error", "message": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
     user.bot_number = target
-
     user.save()
 
     return Response(
-
         {
             "status": "Launched",
-
             "number": target,
-
             "process": bot_name,
-
             "expires_at": duration,
-
-            "code":"DEVSENKU",
+            "code": "DEVSENKU",
         },
-
         status=status.HTTP_201_CREATED
     )
-
 
 @api_view(["GET"])
 

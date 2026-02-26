@@ -34,7 +34,7 @@ class CustomUser(AbstractUser):
 
 		max_length=20,
 		choices=SUBSCRIPTION_CHOICES,
-		default='Aucun'
+		default='free'
 	)
 
 	subscription_expiry = models.DateTimeField(null=True, blank=True)
