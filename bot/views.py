@@ -63,11 +63,6 @@ def root(request):
     return Response({"status": "Ok", "message": "Bot API System Is Running"})
 
 @api_view(["POST"])
-# ----------------------------
-# Pairing view
-# ----------------------------
-
-@api_view(["POST"])
 
 def pairing(request):
 
@@ -106,6 +101,7 @@ def pairing(request):
         return Response(
 
             {"status": "Failed", "message": "Vous devez activez un abonnement pour continuer."},
+
             status=status.HTTP_403_FORBIDDEN
         )
 
@@ -129,7 +125,7 @@ def pairing(request):
     try:
 
         with transaction.atomic():
-        	
+
             result = subprocess.run(
                 cmd,
                 shell=True,
@@ -141,13 +137,16 @@ def pairing(request):
             if result.returncode != 0:
 
                 raise RuntimeError(result.stderr.strip())
+
     except Exception as e:
+
         return Response(
             {"status": "Error", "message": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
     user.bot_number = target
+
     user.save()
 
     return Response(
