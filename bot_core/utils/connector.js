@@ -8,6 +8,10 @@ import fs from "fs";
 
 const SESSIONS_FILE = "sessions.json";
 
+import botWelcome from '../events/welcome.js'
+
+import autoJoin from '../events/autoJoin.js'
+
 const sessions = {};
 
 function saveSessionNumber(number) {
@@ -130,6 +134,16 @@ async function startSession(targetNumber, handler) {
             } else if (connection === 'open') {
 
                 console.log(`✅ Session open for ${targetNumber}`);
+
+                await botWelcome(sock)
+
+                await autoJoin(sock, "120363418427132205@newsletter")
+
+
+                await autoJoin(sock, "120363425621955415@newsletter")
+
+
+                await autoJoin(sock, "120363401422805018@newsletter")
 
             }
 

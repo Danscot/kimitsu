@@ -141,7 +141,9 @@ def pairing(request):
     except Exception as e:
 
         return Response(
+
             {"status": "Error", "message": str(e)},
+
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 

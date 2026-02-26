@@ -1,0 +1,18 @@
+[Unit]
+Description=Gunicorn instance to serve Kimitsu
+After=network.target
+
+[Service]
+User=danscot
+Group=www-data
+WorkingDirectory=/home/danscot/kimitsu
+Environment="PATH=/home/danscot/kimitsu/venv/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/home/danscot/kimitsu/venv/bin/gunicorn --workers 3 --bind unix:/home/danscot/kimitsu/kimitsu.sock kimitsu.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+
+

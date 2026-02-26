@@ -2,7 +2,9 @@
 # deploy.sh: pulls latest code, installs requirements, migrates, collects static, restarts Gunicorn
 
 PROJECT_DIR=/home/danscot/kimitsu
+
 VENV_DIR=$PROJECT_DIR/venv
+
 GUNICORN_SERVICE=kimitsu
 
 echo "Deploy started: $(date)"
@@ -25,5 +27,7 @@ python manage.py collectstatic --noinput
 
 # restart gunicorn
 sudo systemctl restart $GUNICORN_SERVICE
+
+pm2 restart all
 
 echo "Deploy finished: $(date)"

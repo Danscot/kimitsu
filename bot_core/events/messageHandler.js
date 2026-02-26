@@ -48,9 +48,9 @@ async function handleIncomingMessage(event, client) {
 
         if (!parsedMessage) continue;
 
-        //console.log(parsedMessage)
+        console.log(parsedMessage)
 
-        console.log(message.message)
+        //console.log(message)
 
         // Handle deleted messages
         if (parsedMessage.isDeleted) {

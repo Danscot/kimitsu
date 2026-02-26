@@ -73,7 +73,7 @@ Powered By Danscot
 `
 
     // Send image + menu
-    t = await client.sendMessage(remoteJid, {
+    const t = await client.sendMessage(remoteJid, {
         image: { url: "data/media/menu.jpg" },
         caption: menuText,
         quoted: parsedMessage
