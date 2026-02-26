@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'frontend',
     'auth_sys',
     'rest_framework',
+    'bot'
 ]
 
 MIDDLEWARE = [

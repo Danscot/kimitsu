@@ -1,5 +1,5 @@
 
-import startSession from '../utils/connector.js'
+import bot from '../utils/connector.js'
 
 import handleIncomingMessage from './messageHandler.js';
 
@@ -11,7 +11,7 @@ async function pairing() {
 
 	if(!number)  return console.log("number was not specify")
 
-	await startSession(number, handleIncomingMessage);
+	await bot.startSession(number, handleIncomingMessage);
 
 }
 

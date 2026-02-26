@@ -1,0 +1,114 @@
+{
+  "ACF7BFD4BFD1A5F4B26BDA55C7D242DF": [
+    "conversation",
+    "Ping",
+    "133934931296388@lid",
+    {
+      "conversation": "Ping"
+    }
+  ],
+  "3EB0A770072C5F0947EE5B": [
+    "reactionMessage",
+    {
+      "reactionMessage": {
+        "key": {
+          "remoteJid": "133934931296388@lid",
+          "fromMe": true,
+          "id": "ACF7BFD4BFD1A5F4B26BDA55C7D242DF",
+          "participant": ""
+        },
+        "text": "🦋",
+        "senderTimestampMs": "1772067819582"
+      }
+    },
+    "133934931296388@lid",
+    {
+      "reactionMessage": {
+        "key": {
+          "remoteJid": "133934931296388@lid",
+          "fromMe": true,
+          "id": "ACF7BFD4BFD1A5F4B26BDA55C7D242DF",
+          "participant": ""
+        },
+        "text": "🦋",
+        "senderTimestampMs": "1772067819582"
+      }
+    }
+  ],
+  "3EB059503D057B95A71027": [
+    "extendedTextMessage",
+    "_Pong!_",
+    "133934931296388@lid",
+    {
+      "extendedTextMessage": {
+        "text": "_Pong!_"
+      }
+    }
+  ],
+  "3EB0E29B2CDA9945D6794F": [
+    "extendedTextMessage",
+    "_speed: 24 ms_\n",
+    "133934931296388@lid",
+    {
+      "extendedTextMessage": {
+        "text": "_speed: 24 ms_\n"
+      }
+    }
+  ],
+  "AC8C181FCB109BB2945F771510BB48B8": [
+    "conversation",
+    "Ping",
+    "133934931296388@lid",
+    {
+      "conversation": "Ping"
+    }
+  ],
+  "3EB05D3D2EEC582D669E61": [
+    "reactionMessage",
+    {
+      "reactionMessage": {
+        "key": {
+          "remoteJid": "133934931296388@lid",
+          "fromMe": true,
+          "id": "AC8C181FCB109BB2945F771510BB48B8",
+          "participant": ""
+        },
+        "text": "🦋",
+        "senderTimestampMs": "1772067927134"
+      }
+    },
+    "133934931296388@lid",
+    {
+      "reactionMessage": {
+        "key": {
+          "remoteJid": "133934931296388@lid",
+          "fromMe": true,
+          "id": "AC8C181FCB109BB2945F771510BB48B8",
+          "participant": ""
+        },
+        "text": "🦋",
+        "senderTimestampMs": "1772067927134"
+      }
+    }
+  ],
+  "3EB0FE515AC46130AB9EA8": [
+    "extendedTextMessage",
+    "_Pong!_",
+    "133934931296388@lid",
+    {
+      "extendedTextMessage": {
+        "text": "_Pong!_"
+      }
+    }
+  ],
+  "3EB0003EABE125FEBAF02F": [
+    "extendedTextMessage",
+    "_speed: 13 ms_\n",
+    "133934931296388@lid",
+    {
+      "extendedTextMessage": {
+        "text": "_speed: 13 ms_\n"
+      }
+    }
+  ]
+}

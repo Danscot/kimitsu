@@ -28,6 +28,8 @@ def subscription(request):
 
     return render(request, 'subscription.html')
 
+
+@login_required(login_url='login')
 def profile(request):
 
     return render(request, 'profile.html')

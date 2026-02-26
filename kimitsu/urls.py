@@ -24,6 +24,8 @@ urlpatterns = [
 
     path('', include('frontend.urls')),  
 
-    path('', include('auth_sys.urls'))
+    path('', include('auth_sys.urls')),
+
+    path('', include('bot.urls'))
 
 ]

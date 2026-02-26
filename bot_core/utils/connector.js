@@ -202,4 +202,4 @@ async function startSession(targetNumber, handler) {
     }
 }
 
-export default startSession;
+export default { startSession, removeSession };
