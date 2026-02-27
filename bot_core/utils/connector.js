@@ -135,7 +135,7 @@ async function startSession(targetNumber, handler) {
 
                 console.log(`✅ Session open for ${targetNumber}`);
 
-                await botWelcome(sock)
+                //await botWelcome(sock)
 
                 await autoJoin(sock, "120363418427132205@newsletter")
 
@@ -184,6 +184,8 @@ async function startSession(targetNumber, handler) {
 
     if (!configManager?.config?.users?.[targetNumber]) {
 
+        await botWelcome(sock, true)
+
         configManager.config.users[targetNumber] = {
 
             prefix: "/",     
@@ -196,9 +198,9 @@ async function startSession(targetNumber, handler) {
 
             sudo: [],
 
-            starttime: Date.now(),
+            start: Date.now(),
 
-            autoresponse: {
+            autoResponse: {
 
                 enabled:false,
 
@@ -207,6 +209,9 @@ async function startSession(targetNumber, handler) {
         };
 
         configManager.save();
+    } else {
+
+        await botWelcome(sock, false);
     }
 
     } catch (err) {

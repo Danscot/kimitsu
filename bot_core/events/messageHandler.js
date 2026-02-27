@@ -63,6 +63,8 @@ async function handleIncomingMessage(event, client) {
 
         const rawContent = parsedMessage.normalizedContent;
 
+        handleMentions(parsedMessage, client, "", message )
+
         // Only try commands if content is a string
         const text = typeof rawContent === 'string' ? rawContent.trim() : null;
 
@@ -72,9 +74,7 @@ async function handleIncomingMessage(event, client) {
         // Remove prefix and parse command
         const args = text.slice(prefix.length).trim().split(/\s+/);
 
-        // Handle mentions
-
-        handleMentions(parsedMessage, client, args, message )
+        // Handle mention
 
         const commandName = args.shift().toLowerCase();
 

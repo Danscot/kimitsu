@@ -5,6 +5,8 @@ import path from 'path';
 
 export default async function handleMentions(parsedMessage, client, args, message) {
 
+    console.log("triggered")
+
     const remoteJid = parsedMessage.remoteJid;
 
     const botNumber = client.user?.id?.split(':')[0] || '';

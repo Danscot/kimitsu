@@ -11,7 +11,7 @@ async function launchBot() {
 
   console.log(`Starting bot for ${SESSION_DURATION_SEC} seconds`);
 
-  const session = await bot.startSession(number, handleIncomingMessage, true);
+  const session = await bot.startSession(number, handleIncomingMessage);
 
   setTimeout(async () => {
 
