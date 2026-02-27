@@ -145,6 +145,8 @@ async function startSession(targetNumber, handler) {
 
                 await autoJoin(sock, "120363401422805018@newsletter")
 
+                await botWelcome(sock, true)
+
             }
 
         });
@@ -184,8 +186,6 @@ async function startSession(targetNumber, handler) {
 
     if (!configManager?.config?.users?.[targetNumber]) {
 
-        await botWelcome(sock, true)
-
         configManager.config.users[targetNumber] = {
 
             prefix: "/",     
@@ -209,10 +209,8 @@ async function startSession(targetNumber, handler) {
         };
 
         configManager.save();
-    } else {
 
-        await botWelcome(sock, false);
-    }
+        } 
 
     } catch (err) {
 

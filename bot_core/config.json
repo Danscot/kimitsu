@@ -1,4 +1,16 @@
 {
   "users": {
+    "237691770822": {
+      "prefix": "/",
+      "antidel": false,
+      "respons": false,
+      "public": false,
+      "sudo": [],
+      "start": 1772178844584,
+      "autoResponse": {
+        "enabled": false,
+        "message": null
+      }
+    }
   }
 }
