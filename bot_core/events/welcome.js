@@ -9,8 +9,9 @@ export default async function botWelcome(client, first) {
 ╰━━━━━━━━━━━━━━━✦
 ━━━━━━━━━━━━━━━✦
 ❍ Statut : 𝚅𝚘𝚝𝚛𝚎 𝙱𝚘𝚝 𝙺𝚒𝚖𝚒𝚝𝚜𝚞 𝚎𝚜𝚝 𝚊𝚌𝚝𝚒𝚏
+❍ Message : commandes take et getpp ajouté
 ❍ Créateur : @𝙳𝚊𝚗𝚜𝚌𝚘𝚝
-❍ Plugins : 20
+❍ Plugins : 22
 ━━━━━━━━━━━━━━━✦
 
 Pour voir toutes les commandes, tapez /menu

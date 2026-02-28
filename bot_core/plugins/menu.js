@@ -47,6 +47,8 @@ ${arrow} ${prefix}setprefix
 ╭━❍  ᴍᴇᴅɪᴀ
 ${arrow} ${prefix}vv
 ${arrow} ${prefix}save
+${arrow} ${prefix}take
+${arrow} ${prefix}getpp
 ${arrow} ${prefix}sticker
 ${arrow} ${prefix}gcstatus
 ╰━━━━━━━━━━━━━━━╯

@@ -1,11 +1,13 @@
 import webp from 'node-webpmux';
+
 import { downloadContentFromMessage } from 'baileys';
+
 import { Buffer } from 'buffer';
 
 export async function take(parsed, client, args) {
 
     const username = parsed.pushName || "Unknown";
-    const argsText = args.join('');
+    const argsText = args.join(' ');
 
     // Must quote something
     if (!parsed.isQuoted) {

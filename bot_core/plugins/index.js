@@ -37,6 +37,10 @@ import settag from './settag.js';
 
 import take from './take.js';
 
+import getpp from './getpp.js';
+
+import setpp from './setpp.js';
+
 export const commands = {
 
 	test: test,
@@ -84,5 +88,9 @@ export const commands = {
 	settag: settag,
 
 	take:take,
+
+	getpp:getpp,
+
+	setpp:setpp,
 
 };
