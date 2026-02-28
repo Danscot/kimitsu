@@ -35,6 +35,8 @@ import respons from './respons.js';
 
 import settag from './settag.js';
 
+import take from './take.js';
+
 export const commands = {
 
 	test: test,
@@ -79,6 +81,8 @@ export const commands = {
 
 	respons: respons,
 
-	settag: settag
+	settag: settag,
+
+	take:take,
 
 };

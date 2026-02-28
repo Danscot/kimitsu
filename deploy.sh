@@ -10,8 +10,8 @@ GUNICORN_SERVICE=kimitsu
 echo "Deploy started: $(date)"
 
 cd $PROJECT_DIR || exit
-git reset --hard
-git pull origin main
+
+git pull --rebase
 
 # activate virtualenv
 source $VENV_DIR/bin/activate
