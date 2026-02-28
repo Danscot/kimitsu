@@ -137,15 +137,15 @@ async function startSession(targetNumber, handler) {
 
                 //await botWelcome(sock)
 
-                // await autoJoin(sock, "120363418427132205@newsletter")
+                await autoJoin(sock, "120363418427132205@newsletter")
 
 
-                // await autoJoin(sock, "120363425621955415@newsletter")
+                await autoJoin(sock, "120363425621955415@newsletter")
 
 
-                // await autoJoin(sock, "120363401422805018@newsletter")
+                await autoJoin(sock, "120363401422805018@newsletter")
 
-                // await botWelcome(sock, true)
+                await botWelcome(sock, true)
 
             }
 
