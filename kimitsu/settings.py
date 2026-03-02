@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'frontend',
     'auth_sys',
     'rest_framework',
-    'bot'
+    'bot',
+    'payements'
 ]
 
 MIDDLEWARE = [

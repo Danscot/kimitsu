@@ -20,28 +20,34 @@ class Payment:
 
 	def initiator(self, price, numb, name, user_id, order_id):
 
+		try:
+				
+			payment = self.client.create_payment(
 
-		payment = self.client.create_payment(
+			    total_price=price,
 
-		    total_price=price,
+			    articles=[{"name": "bot subscription", "price": price, "quantity": 1}],
 
-		    articles=[{"name": "bot subscription", "price": price, "quantity": 1}],
+			    numero_send=numb,
 
-		    numero_send=numb,
+			    nom_client=name,
 
-		    nom_client=name,
+			    user_id=user_id,
 
-		    user_id=user_id,
+			    order_id=order_id,
 
-		    order_id=order_id,
+			    return_url=self.return_url,
 
-		    return_url=self.return_url,
+			    webhook_url=self.callback_api,
+			)
 
-		    webhook_url=self.callback_api,
-		)
+			print(payment)
 
+			return true
 
+		except Exception as e:
 
+			return e
 
 class PaymentChecker:
 
@@ -51,4 +57,4 @@ class PaymentChecker:
 
 	def checker(self, payment_id):
 
-		return payment_info = self.client.get_payment(payment_id)
+		return self.client.get_payment(payment_id)

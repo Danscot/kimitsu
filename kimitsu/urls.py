@@ -26,6 +26,8 @@ urlpatterns = [
 
     path('', include('auth_sys.urls')),
 
-    path('', include('bot.urls'))
+    path('', include('bot.urls')),
+
+    path('', include('payements.urls')),
 
 ]
