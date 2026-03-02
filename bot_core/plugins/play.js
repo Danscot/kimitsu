@@ -65,6 +65,7 @@ export async function play(parser, client) {
         const { data } = await axios.get(apiUrl);
 
         if (data.status !== 'ok' || !data.results?.download_url) {
+            
             throw new Error('❌ Échec de la récupération de l\'audio depuis l\'API.');
         }
 

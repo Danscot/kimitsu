@@ -131,9 +131,9 @@ def login_view(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    print(email)
+    user = authenticate(request, email=email, password=password)
 
-    user = authenticate(email=email, password=password)
+    print(user)
  
     if user is not None:
 

@@ -52,7 +52,7 @@ export async function status(parsedMessage, client, args, message) {
 ❍ Uptime : ${uptime}
 ❍ Latency : ${latency}ms
 ❍ Prefix  : ${botConfig.prefix}
-❍ Plugins : 20
+❍ Plugins : 22
 ━━━━━━━━━━━━━━━✦
 `;
 

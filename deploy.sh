@@ -11,7 +11,9 @@ echo "Deploy started: $(date)"
 
 cd $PROJECT_DIR || exit
 
-git pull --rebase
+git reset --hard
+
+git pull origin main
 
 # activate virtualenv
 source $VENV_DIR/bin/activate
