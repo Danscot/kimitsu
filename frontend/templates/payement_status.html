@@ -1,0 +1,378 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Statut du paiement — Kimitsu</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+<style>
+    .status-wrap {
+      min-height: calc(100vh - 65px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .status-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 3rem 2.5rem;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .status-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      transition: background 0.4s;
+    }
+
+    .status-card.validated::before {
+      background: linear-gradient(90deg, var(--success), #3de89a);
+    }
+
+    .status-card.pending::before {
+      background: linear-gradient(90deg, var(--gold), #f0d070);
+    }
+
+    /* Icon circle */
+    .status-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      margin: 0 auto 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .status-card.validated .status-icon {
+      background: rgba(100, 200, 150, 0.1);
+      border: 1px solid rgba(100, 200, 150, 0.25);
+    }
+
+    .status-card.pending .status-icon {
+      background: rgba(232, 200, 100, 0.1);
+      border: 1px solid rgba(232, 200, 100, 0.25);
+    }
+
+    .status-icon svg {
+      width: 30px;
+      height: 30px;
+    }
+
+    .status-card.validated .status-icon svg { stroke: var(--success); }
+    .status-card.pending .status-icon svg { stroke: var(--gold); }
+
+    /* Pulse ring for pending */
+    .status-card.pending .status-icon::after {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1px solid rgba(232, 200, 100, 0.2);
+      animation: ringPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes ringPulse {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.08); opacity: 0.2; }
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.9rem;
+      border-radius: 20px;
+      margin-bottom: 1.2rem;
+    }
+
+    .status-card.validated .status-badge {
+      background: rgba(100, 200, 150, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(100, 200, 150, 0.2);
+    }
+
+    .status-card.pending .status-badge {
+      background: rgba(232, 200, 100, 0.1);
+      color: var(--gold);
+      border: 1px solid rgba(232, 200, 100, 0.2);
+    }
+
+    .badge-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .status-card.pending .badge-dot {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .status-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 300;
+      margin-bottom: 0.6rem;
+      line-height: 1.2;
+    }
+
+    .status-card.validated .status-title { color: var(--text); }
+    .status-card.pending .status-title { color: var(--text); }
+
+    .status-desc {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    /* Plan summary */
+    .plan-summary {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 2rem;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .plan-summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .plan-summary-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .plan-summary-value {
+      font-size: 0.82rem;
+      color: var(--text);
+    }
+
+    .plan-summary-divider {
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Actions */
+    .status-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .status-actions a,
+    .status-actions button {
+      width: 100%;
+      text-align: center;
+      padding: 0.85rem;
+      border-radius: 2px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: block;
+    }
+
+    .btn-main {
+      background: var(--lavender-deep);
+      color: #fff;
+      border: none;
+    }
+
+    .btn-main:hover { background: var(--magenta); }
+
+    .btn-sec {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-sec:hover { border-color: var(--lavender-deep); color: var(--lavender); }
+
+    /* Pending refresh note */
+    .refresh-note {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 1.2rem;
+      letter-spacing: 0.05em;
+    }
+
+    .refresh-note span {
+      color: var(--gold);
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="nav-logo" href="index.html">Kimitsu</a>
+    <div class="nav-right">
+      <ul class="nav-links">
+
+        <li><a href="{% url 'profile' %}" onclick="toggleMenu()">Mon compte</a></li>
+        <li>    <a href="{% url 'subscription' %}" onclick="toggleMenu()">Abonnement</a></li>
+      </ul>
+    </div>
+    <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+
+         <a href="{% url 'subscription' %}" onclick="toggleMenu()">Abonnement</a>
+
+        <a href="{% url 'profile' %}" onclick="toggleMenu()">Mon compte</a>
+  </div>
+
+  <div class="status-wrap">
+    {% if error %}
+      <div class="status-card">
+        <p>{{ error }}</p>
+      </div>
+    {% else %}
+      <!-- VALIDATED STATE -->
+      {% if status == "paid" %}
+        <div class="status-card validated">
+          <div class="status-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div class="status-badge"><div class="badge-dot"></div>Paiement validé</div>
+          <div class="status-title">Ton abonnement<br />est actif.</div>
+          <p class="status-desc">Le paiement a bien été reçu. Kimitsu est prête à utiliser sur ton numéro WhatsApp.</p>
+
+          <div class="plan-summary">
+            <div class="plan-summary-row">
+              <span class="plan-summary-label">Plan</span>
+              <span class="plan-summary-value">{{ plan }}</span>
+            </div>
+            <div class="plan-summary-divider"></div>
+            <div class="plan-summary-row">
+              <span class="plan-summary-label">Durée</span>
+              <span class="plan-summary-value">
+                {% if plan == 'Mensuel' %}1 mois
+                {% elif plan == 'Bimensuel' %}2 semaines
+                {% else %}24 heures
+                {% endif %}
+              </span>
+            </div>
+            <div class="plan-summary-divider"></div>
+            <div class="plan-summary-row">
+              <span class="plan-summary-label">Expire le</span>
+              <span class="plan-summary-value">{{ expiry|date:"d F Y" }}</span>
+            </div>
+            <div class="plan-summary-divider"></div>
+            <div class="plan-summary-row">
+              <span class="plan-summary-label">Montant payé</span>
+              <span class="plan-summary-value">{{ amount }} XAF</span>
+            </div>
+          </div>
+
+          <div class="status-actions">
+            <a class="btn-main" href="profile.html">Voir mon compte</a>
+            <a class="btn-sec" href="pairing.html">Connecter mon numéro</a>
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- PENDING STATE -->
+      {% if status == "pending" %}
+        <div class="status-card pending">
+          <div class="status-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <div class="status-badge"><div class="badge-dot"></div>En attente</div>
+          <div class="status-title">Paiement en<br />cours de vérification.</div>
+          <p class="status-desc">Ton paiement a été initié. Il est en cours de traitement — cela peut prendre quelques minutes.</p>
+
+          <div class="plan-summary">
+            <div class="plan-summary-row">
+              <span class="plan-summary-label">Plan</span>
+              <span class="plan-summary-value">{{ plan }}</span>
+            </div>
+            <div class="plan-summary-divider"></div>
+            <div class="plan-summary-row">
+              <span class="plan-summary-label">Montant</span>
+              <span class="plan-summary-value">{{ amount }} XAF</span>
+            </div>
+            <div class="plan-summary-divider"></div>
+            <div class="plan-summary-row">
+              <span class="plan-summary-label">Statut</span>
+              <span class="plan-summary-value" style="color: var(--gold);">En attente de confirmation</span>
+            </div>
+          </div>
+
+          <div class="status-actions">
+            <button class="btn-main" onclick="checkStatus()">Vérifier le statut</button>
+            <a class="btn-sec" href="{% url 'subscription' %}" onclick="toggleMenu()">Retour à l'abonnement</a>
+          </div>
+
+          <p class="refresh-note">Vérification automatique dans <span id="countdown">30</span>s</p>
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById('mobileMenu');
+      const burger = document.querySelector('.hamburger');
+      menu.classList.toggle('open');
+      burger.classList.toggle('open');
+    }
+
+    // Auto-refresh countdown for pending state
+    {% if status == "pending" %}
+      let countdownVal = 30;
+      let countdownInterval;
+
+      function startCountdown() {
+        countdownInterval = setInterval(() => {
+          countdownVal--;
+          const el = document.getElementById('countdown');
+          if (el) el.textContent = countdownVal;
+          if (countdownVal <= 0) {
+            clearInterval(countdownInterval);
+            checkStatus();
+          }
+        }, 1000);
+      }
+
+      function checkStatus() {
+        // Reload the page to check the status again
+        window.location.reload();
+      }
+
+      startCountdown();
+    {% endif %}
+  </script>
+</body>
+</html>

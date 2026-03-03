@@ -188,17 +188,7 @@
 
     <div class="plans-label">Changer de plan</div>
     <div class="plans-grid">
-      <div class="plan {% if not user.subscription_plan %}selected{% endif %}" onclick="selectPlan(this,'Essai','0','24 heures')">
-        <div class="radio-check"></div>
-        <div class="plan-name">Essai</div>
-        <div class="plan-price">0 <span class="plan-currency">XAF</span></div>
-        <div class="plan-period">24 heures</div>
-        <div class="plan-divider"></div>
-        <ul class="plan-features">
-          <li>Accès complet</li>
-          <li>Sans engagement</li>
-        </ul>
-      </div>
+
       <div class="plan {% if user.subscription_plan == 'bimensuel' %}selected{% endif %}" onclick="selectPlan(this,'Bimensuel','500','14 Jours')">
         <div class="radio-check"></div>
         <div class="plan-name">Bimensuel</div>

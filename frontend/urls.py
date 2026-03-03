@@ -14,6 +14,8 @@ urlpatterns = [
 
     path("pairing/", views.pairing, name="pairing"),
 
-    path('subscription/', views.subscription, name="subscription")
+    path('subscription/', views.subscription, name="subscription"),
+
+    path('callback/', views.payment_status, name='callback')
 
 ]

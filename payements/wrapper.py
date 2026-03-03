@@ -14,9 +14,9 @@ class Payment:
 
 		self.client = PaymentClient(api_key_url=os.getenv('API_PAIEMENT'))
 
-		self.return_url = "https://bothost.danscot.dev"
+		self.return_url = "https://bothost.danscot.dev/callback"
 
-		self.callback_api = "https://bothost.danscot.dev/api/callback"
+		#self.callback_api = ""
 
 	def initiator(self, price, numb, name, user_id, order_id):
 
@@ -38,7 +38,7 @@ class Payment:
 
 				return_url=self.return_url,
 
-				webhook_url=self.callback_api,
+				#webhook_url=self.callback_api,
 			)
 
 			response = {
@@ -69,7 +69,5 @@ class PaymentChecker:
 	def checker(self, payment_id):
 
 		status = self.client.get_payment(str(payment_id.strip().replace('"', '').replace("'", "")))
-
-		print(status)
 
 		return status
