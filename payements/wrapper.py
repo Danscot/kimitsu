@@ -24,26 +24,37 @@ class Payment:
 				
 			payment = self.client.create_payment(
 
-			    total_price=price,
+				total_price=price,
 
-			    articles=[{"name": "bot subscription", "price": price, "quantity": 1}],
+				articles=[{"name": "bot subscription", "price": price, "quantity": 1}],
 
-			    numero_send=numb,
+				numero_send=numb,
 
-			    nom_client=name,
+				nom_client=name,
 
-			    user_id=user_id,
+				user_id=user_id,
 
-			    order_id=order_id,
+				order_id=order_id,
 
-			    return_url=self.return_url,
+				return_url=self.return_url,
 
-			    webhook_url=self.callback_api,
+				webhook_url=self.callback_api,
 			)
 
-			print(payment)
+			response = {
 
-			return true
+				'statut': payment.get('statut'),
+
+				'token': payment.get('token'),
+
+				'message': payment.get('message'),
+				
+				'url': payment.get('url'),
+			}
+
+
+			return response
+
 
 		except Exception as e:
 
@@ -57,4 +68,8 @@ class PaymentChecker:
 
 	def checker(self, payment_id):
 
-		return self.client.get_payment(payment_id)
+		status = self.client.get_payment(str(payment_id.strip().replace('"', '').replace("'", "")))
+
+		print(status)
+
+		return status
