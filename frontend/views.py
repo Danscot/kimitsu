@@ -85,3 +85,12 @@ def payment_status(request):
 
             'error': f'An error occurred: {str(e)}'
         })
+
+
+@login_required
+
+def web_logout(request):
+
+    logout(request)
+
+    return redirect("login")

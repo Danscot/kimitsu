@@ -75,7 +75,7 @@
         <li><a href="{% url 'pairing' %}">Connexion</a></li>
         <li><a href="{% url 'subscription' %}">Abonnement</a></li>
       </ul>
-      <a class="logout-btn" href="#">Déconnexion</a>
+      <a class="logout-btn" href="{% url 'web_logout' %}">Déconnexion</a>
     </div>
     <div class="hamburger" onclick="toggleMenu()">
       <span></span>
@@ -88,7 +88,7 @@
     <a href="{% url 'profile' %}" onclick="toggleMenu()">Mon compte</a>
     <a href="{% url 'pairing' %}" onclick="toggleMenu()">Connexion</a>
     <a href="{% url 'subscription' %}" onclick="toggleMenu()">Abonnement</a>
-    <a href="#">Déconnexion</a>
+    <a href="{% url 'web_logout' %}">Déconnexion</a>
   </div>
 
   <div class="page">
@@ -234,8 +234,7 @@
 
     <div class="actions">
       <a class="btn-primary" href="{% url 'subscription' %}">Changer de plan</a>
-      <a class="btn-ghost" href="{% url 'pairing' %}">Gérer la connexion</a>
-      <button class="btn-danger" onclick="confirmLogout()">Se déconnecter</button>
+      <a class="btn-primary" href="{% url 'pairing' %}">Bot</a>
     </div>
   </div>
 

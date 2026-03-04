@@ -132,8 +132,6 @@ def login_view(request):
         )
 
     user = authenticate(request, email=email, password=password)
-
-    print(user)
  
     if user is not None:
 

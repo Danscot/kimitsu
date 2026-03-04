@@ -1,0 +1,20 @@
+
+1. Migrate Alert messages to clean messages
+
+2. Logout button #DONE
+
+3. Finishing subscription page
+
+4. Correcting some mobile style issues
+
+5. Fixing my youtube API
+
+6. Fixing the bot automessage
+
+7. Make myself a dashboard
+
+8. Fixing bot expiration
+
+9. Fixing account creation process
+
+10. Migration de js dans des fichier distinc

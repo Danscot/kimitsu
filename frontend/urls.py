@@ -16,6 +16,9 @@ urlpatterns = [
 
     path('subscription/', views.subscription, name="subscription"),
 
-    path('callback/', views.payment_status, name='callback')
+    path('callback/', views.payment_status, name='callback'),
+
+    path("logout/", views.web_logout, name="web_logout"),
+
 
 ]
