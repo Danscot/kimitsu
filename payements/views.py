@@ -32,6 +32,14 @@ def payment_api(request):
 
 	order_id = random.randint(100000, 999999)
 
+	if pricing == 460:
+
+		realprice = 500
+
+	else:
+
+		realprice = 1000
+
 
 	if not number or not pricing:
 
@@ -61,7 +69,7 @@ def payment_api(request):
 
     			user=user, 
 
-    			amount=pricing,
+    			amount=realprice,
 
     			status=Payments.PENDING,
 

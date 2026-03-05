@@ -305,7 +305,8 @@
   function handlePayment() {
     const plan = document.getElementById('selectedPlan').value;
     const phoneNumber = document.getElementById('phoneNumber').value;
-    const pricing = plan === 'Bimensuel' ? 200 : plan === 'Mensuel' ? 920 : 0;
+    const pricing = plan === 'Bimensuel' ? 463 : plan === 'Mensuel' ? 926 : 0;
+
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
     if (!phoneNumber) {

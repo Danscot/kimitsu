@@ -5,3 +5,4 @@ psutil
 dotenv
 gunicorn
 apiMoneyFusion
+requests

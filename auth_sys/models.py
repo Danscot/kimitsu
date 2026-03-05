@@ -110,3 +110,14 @@ class CustomUser(AbstractUser):
 		elif self.sub_format == '1000':
 			return 1000
 		return 0
+
+	@property
+	def get_sub_format_display(self):
+
+		if self.sub_format == "500":
+
+			return '14 Jours'
+
+		else:
+
+			return '30 Jours' 
