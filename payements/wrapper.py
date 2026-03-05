@@ -16,7 +16,7 @@ class Payment:
 
 		self.return_url = "https://bothost.danscot.dev/callback"
 
-		#self.callback_api = ""
+		self.callback_api = "https://bothost.danscot.dev/callback"
 
 	def initiator(self, price, numb, name, user_id, order_id):
 
@@ -38,7 +38,7 @@ class Payment:
 
 				return_url=self.return_url,
 
-				#webhook_url=self.callback_api,
+				webhook_url=self.callback_api,
 			)
 
 			response = {

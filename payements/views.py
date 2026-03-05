@@ -32,6 +32,7 @@ def payment_api(request):
 
 	order_id = random.randint(100000, 999999)
 
+
 	if not number or not pricing:
 
 		return Response(
@@ -52,6 +53,8 @@ def payment_api(request):
 
 		order = service.initiator(pricing, number, user.email, user.id, order_id)
 
+		print(order)
+
 		if order.get("statut"):
 
 			payment = Payments.objects.create(
@@ -70,7 +73,9 @@ def payment_api(request):
 				{
 					"status": "created",
 
-					"message": "Order created successfully"
+					"message": "Order created successfully",
+
+					"url": order.get('url'),
 
 				},
 

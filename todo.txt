@@ -3,7 +3,7 @@
 
 2. Logout button #DONE
 
-3. Finishing subscription page
+3. Finishing subscription page #DONE
 
 4. Correcting some mobile style issues
 

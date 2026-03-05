@@ -140,7 +140,7 @@
         <li><a href="{% url 'pairing' %}">Connexion</a></li>
         <li><a href="{% url 'subscription' %}" class="active">Abonnement</a></li>
       </ul>
-      <a class="logout-btn" href="">Déconnexion</a>
+      <a class="logout-btn" href="{% url 'web_logout' %}">Déconnexion</a>
     </div>
     <div class="hamburger" onclick="toggleMenu()">
       <span></span>
@@ -153,7 +153,7 @@
     <a href="{% url 'profile' %}" onclick="toggleMenu()">Mon compte</a>
     <a href="{% url 'pairing' %}" onclick="toggleMenu()">Connexion</a>
     <a href="{% url 'subscription' %}" onclick="toggleMenu()">Abonnement</a>
-    <a href="">Déconnexion</a>
+    <a href="{% url 'web_logout' %}">Déconnexion</a>
   </div>
 
   <div class="page">
@@ -161,15 +161,15 @@
     <h1 class="section-title">Ton abonnement</h1>
     <p class="section-sub">Choisis le plan qui te convient. Change ou renouvelle à tout moment.</p>
 
-    {% if user.subscription_plan %}
+    {% if user.sub_format %}
       <div class="current-plan">
         <div>
           <div class="cp-label">Plan actuel</div>
           <div class="cp-name">
-            {{ user.subscription_plan|title }}
+            {{ user.sub_format|title }}
           </div>
           <div class="cp-expire">
-            Expire le <strong>{{ user.subscription_end|date:"j F Y" }}</strong>
+            Expire le <strong>{{ user.subscription_expiry|date:"j F Y" }}</strong>
           </div>
         </div>
         <span class="badge badge-active">
@@ -189,7 +189,7 @@
     <div class="plans-label">Changer de plan</div>
     <div class="plans-grid">
 
-      <div class="plan {% if user.subscription_plan == 'bimensuel' %}selected{% endif %}" onclick="selectPlan(this,'Bimensuel','500','14 Jours')">
+      <div class="plan {% if user.sub_format == 'bimensuel' %}selected{% endif %}" onclick="selectPlan(this,'Bimensuel','500','14 Jours')">
         <div class="radio-check"></div>
         <div class="plan-name">Bimensuel</div>
         <div class="plan-price">500 <span class="plan-currency">XAF</span></div>
@@ -200,7 +200,7 @@
           <li>Support disponible</li>
         </ul>
       </div>
-      <div class="plan {% if user.subscription_plan == 'mensuel' %}selected{% endif %}" onclick="selectPlan(this,'Mensuel','1000','30 Jours')">
+      <div class="plan {% if user.sub_format == 'mensuel' %}selected{% endif %}" onclick="selectPlan(this,'Mensuel','1000','30 Jours')">
         <div class="radio-check"></div>
         <div class="plan-name">Mensuel</div>
         <div class="plan-price">1000 <span class="plan-currency">XAF</span></div>
@@ -220,13 +220,13 @@
       </div>
       <div class="payment-body">
         <div class="pay-methods">
-          <div class="pay-method selected" onclick="selectMethod(this)">Mobile Money</div>
-          <div class="pay-method" onclick="selectMethod(this)">Orange Money</div>
+          <div class="pay-method selected" onclick="selectMethod(this)">Payment Mobile</div>
+          <div class="pay-method" onclick="selectMethod(this)">Crypto</div>
           <div class="pay-method" onclick="selectMethod(this)">Autres</div>
         </div>
         <div class="field">
           <label>Numéro de téléphone</label>
-          <input type="tel" id="phoneInput" placeholder="+237 6•• ••• •••" value="{{ user.phone_number|default:'' }}" />
+          <input type="tel" id="phoneNumber" placeholder="+237 6•• ••• •••" value="{{ user.bot_number|default:'' }}" />
         </div>
       </div>
     </div>
@@ -235,8 +235,8 @@
       <div class="summary-row">
         <span class="summary-row-label">Plan sélectionné</span>
         <span class="summary-row-value" id="sumPlan">
-          {% if user.subscription_plan %}
-            {{ user.subscription_plan|title }}
+          {% if user.sub_format %}
+            {{ user.sub_format|title }}
           {% else %}
             Essai
           {% endif %}
@@ -245,9 +245,9 @@
       <div class="summary-row">
         <span class="summary-row-label">Durée</span>
         <span class="summary-row-value" id="sumPeriod">
-          {% if user.subscription_plan == 'bimensuel' %}
+          {% if user.sub_format == 'bimensuel' %}
             14 Jours
-          {% elif user.subscription_plan == 'mensuel' %}
+          {% elif user.sub_format == 'mensuel' %}
             30 Jours
           {% else %}
             24 heures
@@ -257,9 +257,9 @@
       <div class="summary-row summary-total">
         <span class="summary-row-label">Total</span>
         <span class="summary-row-value" id="sumTotal">
-          {% if user.subscription_plan == 'bimensuel' %}
+          {% if user.sub_format == 'bimensuel' %}
             500 XAF
-          {% elif user.subscription_plan == 'mensuel' %}
+          {% elif user.sub_format == 'mensuel' %}
             1000 XAF
           {% else %}
             Gratuit
@@ -268,34 +268,81 @@
       </div>
     </div>
 
-    <form method="post" action="">
-      {% csrf_token %}
-      <input type="hidden" id="selectedPlan" name="plan" value="{{ user.subscription_plan|default:'Essai' }}">
-      <input type="hidden" id="selectedMethod" name="payment_method" value="Mobile Money">
-      <input type="hidden" id="phoneNumber" name="phone_number" value="{{ user.phone_number|default:'' }}">
-      <button type="submit" class="submit-btn">Confirmer et payer</button>
-    </form>
-    <p class="secure-note">Paiement sécurisé via Mobile Money</p>
-  </div>
+<form id="paymentForm" method="post" action="">
 
+  {% csrf_token %}
 
-  <script>
-    function toggleMenu() { document.getElementById('mobileMenu').classList.toggle('open'); }
-    function selectPlan(el, name, price, period) {
-      document.querySelectorAll('.plan').forEach(p => p.classList.remove('selected'));
-      el.classList.add('selected');
-      document.getElementById('sumPlan').textContent = name;
-      document.getElementById('sumPeriod').textContent = period;
-      document.getElementById('sumTotal').textContent = price === '0' ? 'Gratuit' : price + ' XAF';
+  <input type="hidden" id="selectedPlan" name="plan" value="{{ user.subscription_format }}">
+
+  <input type="hidden" id="selectedMethod" name="payment_method" value="Mobile Money">
+
+  <input type="hidden" id="phoneNumber" name="phone_number" value="{{ user.bot_number|default:'' }}">
+
+  <button type="button" class="submit-btn" onclick="handlePayment()">Confirmer et payer</button>
+
+</form>
+
+<script>
+function toggleMenu() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+
+function selectPlan(el, name, price, period) {
+  document.querySelectorAll('.plan').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('sumPlan').textContent = name;
+  document.getElementById('sumPeriod').textContent = period;
+  document.getElementById('sumTotal').textContent = price === '0' ? 'Gratuit' : price + ' XAF';
+  document.getElementById('selectedPlan').value = name;
+}
+
+function selectMethod(el) {
+  document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('selectedMethod').value = el.textContent.trim();
+}
+
+function handlePayment() {
+  const plan = document.getElementById('selectedPlan').value;
+  const phoneNumber = document.getElementById('phoneNumber').value;
+  const pricing = plan === 'Bimensuel' ? 500 : plan === 'Mensuel' ? 1000 : 0;
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  if (!phoneNumber) {
+    alert('Veuillez entrer un numéro de téléphone valide.');
+    return;
+  }
+
+  fetch('/api/payment/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrfToken,
+    },
+    body: JSON.stringify({
+      number: phoneNumber,
+      pricing: pricing,
+    }),
+  })
+  .then(response => {
+    if (!response.ok) {
+      return response.text().then(text => {
+        throw new Error(`Server error: ${text}`);
+      });
     }
-    function selectMethod(el) {
-      document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('selected'));
-      el.classList.add('selected');
+    return response.json();
+  })
+  .then(data => {
+    if (data.status === 'created') {
+      window.location.href = data.url;
+    } else {
+      alert(`Erreur: ${data.message}`);
     }
-    function handlePayment() {
-      // fetch('/api/subscription/pay/', { method: 'POST', ... })
-      alert('Redirection vers le paiement...');
-    }
-  </script>
-</body>
-</html>
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert(`Une erreur est survenue: ${error.message}`);
+  });
+}
+
+</script>
