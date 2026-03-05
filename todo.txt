@@ -13,6 +13,6 @@
 
 13. Add email verification
 
-14. Fix pricing
+14. Fix pricing #DONE
 
 15. Forgot password nonsense
