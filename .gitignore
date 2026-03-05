@@ -75,3 +75,5 @@ temp
 test.zip
 
 bot_core/data/messages/
+
+bot_core/config.json
