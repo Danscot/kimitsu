@@ -115,8 +115,8 @@
           <div class="info-row">
             <span class="info-row-label">Numéro lié</span>
             <span class="info-row-value">
-              {% if user.phone_number %}
-                {{ user.phone_number|slice:":3" }} ••• •••
+              {% if user.bot_number %}
+                {{ user.bot_number}}
               {% else %}
                 Aucun numéro lié
               {% endif %}

@@ -105,7 +105,7 @@ def pairing(request):
 
     # Check subscription properly
     if not user.is_subscription_active or not user.can_pair: 
-
+ 
         return Response(
 
             {"status": "Failed", "message": "Vous devez activez un abonnement pour continuer."},
@@ -113,7 +113,9 @@ def pairing(request):
             status=status.HTTP_403_FORBIDDEN
         )
 
-    duration = int(time.time()) + 172800  # 48 hours from now
+    duration =  user.subscription_expiry.timestamp()
+
+    print(duration)
 
     bot_name = f"session-{target}"
 
@@ -129,7 +131,7 @@ def pairing(request):
 
         f'NUMBER="{target}" '
         f'PM2_PROCESS_NAME="{bot_name}" '
-        f'DURATION="{duration}" '
+        f'SESSION_DURATION_SEC="{duration}" '
         f'{pm2_path} start {bot_path} --name "{bot_name}"'
     )
 
