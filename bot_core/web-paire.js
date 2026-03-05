@@ -9,32 +9,36 @@ const rawDuration = parseInt(process.env.SESSION_DURATION_SEC || "60");
 const PM2_PROCESS_NAME = process.env.PM2_PROCESS_NAME;
 
 if (!number) {
+
   console.error("Error: NUMBER environment variable is required.");
+
   process.exit(1);
 }
 
 if (!PM2_PROCESS_NAME) {
+
   console.error("Error: PM2_PROCESS_NAME environment variable is required.");
+
   process.exit(1);
 }
-
-// Detect if value is timestamp or duration
 let SESSION_DURATION_SEC;
 
 if (rawDuration > 1000000000) {
-  // treat as unix timestamp
+
   const now = Math.floor(Date.now() / 1000);
+
   SESSION_DURATION_SEC = Math.max(0, rawDuration - now);
+
   console.log(`Expiry timestamp detected: ${rawDuration}`);
+
   console.log(`Time remaining: ${SESSION_DURATION_SEC} seconds`);
 } else {
-  // treat as duration
+
   SESSION_DURATION_SEC = Math.min(rawDuration, 2592000);
 }
 
 console.log(`Starting bot for ${number} (Duration: ${SESSION_DURATION_SEC} seconds)`);
 
-// Function to safely stop the bot
 
 
 async function stopBot() {

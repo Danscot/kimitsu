@@ -272,144 +272,157 @@
       <button class="submit-btn" onclick="closeModal()">Fermer</button>
     </div>
   </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  function toggleMenu() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
 
-  <script>
-    function toggleMenu() {
-      document.getElementById('mobileMenu').classList.toggle('open');
+  let currentCode = '';
+  let timerInterval;
+
+  function requestCode(e) {
+    e.preventDefault();
+    const btn = document.getElementById('pairBtn');
+    const num = document.getElementById('phoneInput').value;
+
+    if (!num) {
+      Swal.fire({
+        title: "Erreur",
+        text: "Veuillez entrer un numéro de téléphone.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      return;
     }
 
-    let currentCode = '';
-    let timerInterval;
+    btn.classList.add('loading');
 
-    function requestCode(e) {
-      e.preventDefault();
-      const btn = document.getElementById('pairBtn');
-      const num = document.getElementById('phoneInput').value;
-      const errorEl = document.getElementById('errorMessage');
-
-      // Reset error message
-      errorEl.style.display = 'none';
-
-      if (!num) {
-        errorEl.textContent = 'Veuillez entrer un numéro de téléphone.';
-        errorEl.style.display = 'block';
-        return;
+    fetch("{% url 'pairing_url' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken(),
+      },
+      body: JSON.stringify({ number: num })
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => {
+          throw new Error(err.message || 'Erreur inconnue');
+        });
       }
-
-      btn.classList.add('loading');
-
-      fetch("{% url 'pairing_url' %}", {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': getCSRFToken(),
-        },
-        body: JSON.stringify({ number: num })
-      })
-      .then(response => {
-        if (!response.ok) {
-          return response.json().then(err => {
-            throw new Error(err.message || 'Erreur inconnue');
-          });
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (data.status === 'Launched') {
-          currentCode = data.code;
-          showCode(currentCode);
-        } else {
-          throw new Error(data.message || 'Échec du lancement');
-        }
-      })
-      .catch(error => {
-        errorEl.textContent = error.message;
-        errorEl.style.display = 'block';
-        console.error('Error:', error);
-      })
-      .finally(() => {
-        btn.classList.remove('loading');
+      return response.json();
+    })
+    .then(data => {
+      if (data.status === 'Launched') {
+        currentCode = data.code;
+        showCode(currentCode);
+      } else {
+        throw new Error(data.message || 'Échec du lancement');
+      }
+    })
+    .catch(error => {
+      Swal.fire({
+        title: "Erreur",
+        text: error.message,
+        icon: "error",
+        confirmButtonText: "OK",
       });
-    }
+      console.error('Error:', error);
+    })
+    .finally(() => {
+      btn.classList.remove('loading');
+    });
+  }
 
-    function showCode(code) {
-      document.getElementById('codeOverlay').classList.add('open');
-      const copyBtn = document.getElementById('copyBtn');
-      copyBtn.classList.remove('copied');
-      copyBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copier le code`;
+  function showCode(code) {
+    document.getElementById('codeOverlay').classList.add('open');
+    const copyBtn = document.getElementById('copyBtn');
+    copyBtn.classList.remove('copied');
+    copyBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copier le code`;
 
-      code.split('').forEach((char, i) => {
-        setTimeout(() => {
-          const cell = document.getElementById('c' + i);
-          cell.textContent = char;
-          cell.classList.add('revealed');
-        }, i * 80);
-      });
-
-      startTimer(1 * 60);
-    }
-
-    function copyCode() {
-      if (!currentCode) return;
-      navigator.clipboard.writeText(currentCode).then(() => {
-        const btn = document.getElementById('copyBtn');
-        btn.classList.add('copied');
-        btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copié !`;
-        setTimeout(() => {
-          btn.classList.remove('copied');
-          btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copier le code`;
-        }, 2000);
-      });
-    }
-
-    function startTimer(seconds) {
-      clearInterval(timerInterval);
-      let remaining = seconds;
-      updateTimer(remaining);
-      timerInterval = setInterval(() => {
-        remaining--;
-        updateTimer(remaining);
-        if (remaining <= 0) {
-          clearInterval(timerInterval);
-          document.getElementById('timerDisplay').textContent = 'Expiré';
-          document.getElementById('timerDisplay').style.color = 'var(--error)';
-        }
-      }, 1000);
-    }
-
-    function updateTimer(seconds) {
-      const m = String(Math.floor(seconds / 60)).padStart(2, '0');
-      const s = String(seconds % 60).padStart(2, '0');
-      document.getElementById('timerDisplay').textContent = `${m}:${s}`;
-    }
-
-    function closeModal() {
-      document.getElementById('codeOverlay').classList.remove('open');
-      clearInterval(timerInterval);
-      for (let i = 0; i < 8; i++) {
+    code.split('').forEach((char, i) => {
+      setTimeout(() => {
         const cell = document.getElementById('c' + i);
-        cell.textContent = '';
-        cell.classList.remove('revealed');
-      }
-      document.getElementById('timerDisplay').style.color = '';
-    }
-
-    document.getElementById('codeOverlay').addEventListener('click', function(e) {
-      if (e.target === this) closeModal();
+        cell.textContent = char;
+        cell.classList.add('revealed');
+      }, i * 80);
     });
 
-    function getCSRFToken() {
-      let cookieValue = null;
-      const cookies = document.cookie.split(";");
-      for (let cookie of cookies) {
-        cookie = cookie.trim();
-        if (cookie.startsWith("csrftoken=")) {
-          cookieValue = cookie.substring("csrftoken=".length);
-          break;
-        }
+    startTimer(1 * 60);
+  }
+
+  function copyCode() {
+    if (!currentCode) return;
+    navigator.clipboard.writeText(currentCode).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.classList.add('copied');
+      btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copié !`;
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copier le code`;
+      }, 2000);
+    });
+  }
+
+  function startTimer(seconds) {
+    clearInterval(timerInterval);
+    let remaining = seconds;
+    updateTimer(remaining);
+    timerInterval = setInterval(() => {
+      remaining--;
+      updateTimer(remaining);
+      if (remaining <= 0) {
+        clearInterval(timerInterval);
+        document.getElementById('timerDisplay').textContent = 'Expiré';
+        document.getElementById('timerDisplay').style.color = 'var(--error)';
+        Swal.fire({
+          title: "Expiré",
+          text: "Le code a expiré. Veuillez en demander un nouveau.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        }).then(() => {
+          closeModal();
+        });
       }
-      return cookieValue;
+    }, 1000);
+  }
+
+  function updateTimer(seconds) {
+    const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+  }
+
+  function closeModal() {
+    document.getElementById('codeOverlay').classList.remove('open');
+    clearInterval(timerInterval);
+    for (let i = 0; i < 8; i++) {
+      const cell = document.getElementById('c' + i);
+      cell.textContent = '';
+      cell.classList.remove('revealed');
     }
-  </script>
+    document.getElementById('timerDisplay').style.color = '';
+  }
+
+  document.getElementById('codeOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  function getCSRFToken() {
+    let cookieValue = null;
+    const cookies = document.cookie.split(";");
+    for (let cookie of cookies) {
+      cookie = cookie.trim();
+      if (cookie.startsWith("csrftoken=")) {
+        cookieValue = cookie.substring("csrftoken=".length);
+        break;
+      }
+    }
+    return cookieValue;
+  }
+</script>
+
 </body>
 </html>

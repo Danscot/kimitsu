@@ -97,95 +97,77 @@
     </div>
 
   </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  function handleSignup(e) {
+    e.preventDefault();
 
-  <script>
+    const pass = document.getElementById('id_password').value;
+    const confirm = document.getElementById('id_confirm').value;
+    let valid = true;
 
-    function handleSignup(e) {
-
-      e.preventDefault();
-
-      const pass = document.getElementById('id_password').value;
-
-      const confirm = document.getElementById('id_confirm').value;
-
-      let valid = true;
-
-      if (pass.length < 8) {
-
-        document.getElementById('passError').style.display = 'block';
-
-        valid = false;
-
-      } else {
-
-        document.getElementById('passError').style.display = 'none';
-
-      }
-
-      if (pass !== confirm) {
-
-        document.getElementById('confirmError').style.display = 'block';
-
-        valid = false;
-
-      } else {
-
-        document.getElementById('confirmError').style.display = 'none';
-
-      }
-
-      if (valid) {
-
-        const form = e.target;
-
-        const formData = new FormData(form);
-
-        fetch("{% url 'signin_api' %}", {
-
-          method: 'POST',
-
-          body: formData,
-
-          headers: {
-
-            'X-CSRFToken': '{{ csrf_token }}',
-
-          },
-
-        })
-
-        .then(response => response.json())
-
-        .then(data => {
-
-          if (data.status == "created") {
-
-            window.location.href = "{% url 'pairing' %}";
-
-          } else if (data.status == "ok") {
-
-            alert("Un compte exist déja avec ces informations.");
-
-          }
-
-
-          else {
-
-            alert("Une erreur est survenue. Veuillez réessayer.");
-
-          }
-
-        })
-
-        .catch(error => {
-
-          alert("Une erreur est survenue. Veuillez réessayer.");
-
-        });
-      }
+    if (pass.length < 8) {
+      Swal.fire({
+        title: "Erreur",
+        text: "Le mot de passe doit contenir au moins 8 caractères.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      valid = false;
     }
 
+    if (pass !== confirm) {
+      Swal.fire({
+        title: "Erreur",
+        text: "Les mots de passe ne correspondent pas.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      valid = false;
+    }
 
-  </script>
+    if (valid) {
+      const form = e.target;
+      const formData = new FormData(form);
+
+      fetch("{% url 'signin_api' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+        },
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status == "created") {
+          window.location.href = "{% url 'pairing' %}";
+        } else if (data.status == "ok") {
+          Swal.fire({
+            title: "Compte existant",
+            text: "Un compte existe déjà avec ces informations.",
+            icon: "warning",
+            confirmButtonText: "OK",
+          });
+        } else {
+          Swal.fire({
+            title: "Erreur",
+            text: "Une erreur est survenue. Veuillez réessayer.",
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+        }
+      })
+      .catch(error => {
+        Swal.fire({
+          title: "Erreur",
+          text: "Une erreur est survenue. Veuillez réessayer.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      });
+    }
+  }
+</script>
+
 </body>
 </html>

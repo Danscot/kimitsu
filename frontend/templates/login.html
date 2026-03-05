@@ -64,52 +64,46 @@
       </div>
     </div>
   </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  
+  function handleLogin(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
 
-  <script>
-
-    function handleLogin(e) {
-
-      e.preventDefault();
-
-      const form = e.target;
-
-      const formData = new FormData(form);
-
-      fetch("{% url 'login_api' %}", {
-
-        method: 'POST',
-
-        body: formData,
-
-        headers: {
-
-          'X-CSRFToken': '{{ csrf_token }}',
-        },
-
-      })
-
-      .then(response => response.json())
-
-      .then(data => {
-
-        if (data.status == "ok") {
-
-          window.location.href = "{% url 'profile' %}";
-
-        } else {
-
-          document.getElementById('loginError').style.display = 'block';
-
-        }
-
-      })
-
-      .catch(error => {
-
-        document.getElementById('loginError').style.display = 'block';
-
+    fetch("{% url 'login_api' %}", {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+      },
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status == "ok") {
+        window.location.href = "{% url 'profile' %}";
+      } else {
+        // Replace the default error display with SweetAlert2
+        Swal.fire({
+          title: "Erreur",
+          text: "Email ou mot de passe incorrect.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    })
+    .catch(error => {
+      // Replace the default error display with SweetAlert2
+      Swal.fire({
+        title: "Erreur",
+        text: "Une erreur s'est produite. Veuillez réessayer.",
+        icon: "error",
+        confirmButtonText: "OK",
       });
-    }
-  </script>
+    });
+  }
+</script>
+
 </body>
 </html>

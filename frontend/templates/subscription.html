@@ -281,68 +281,85 @@
   <button type="button" class="submit-btn" onclick="handlePayment()">Confirmer et payer</button>
 
 </form>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-function toggleMenu() {
-  document.getElementById('mobileMenu').classList.toggle('open');
-}
-
-function selectPlan(el, name, price, period) {
-  document.querySelectorAll('.plan').forEach(p => p.classList.remove('selected'));
-  el.classList.add('selected');
-  document.getElementById('sumPlan').textContent = name;
-  document.getElementById('sumPeriod').textContent = period;
-  document.getElementById('sumTotal').textContent = price === '0' ? 'Gratuit' : price + ' XAF';
-  document.getElementById('selectedPlan').value = name;
-}
-
-function selectMethod(el) {
-  document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('selected'));
-  el.classList.add('selected');
-  document.getElementById('selectedMethod').value = el.textContent.trim();
-}
-
-function handlePayment() {
-  const plan = document.getElementById('selectedPlan').value;
-  const phoneNumber = document.getElementById('phoneNumber').value;
-  const pricing = plan === 'Bimensuel' ? 500 : plan === 'Mensuel' ? 1000 : 0;
-  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-  if (!phoneNumber) {
-    alert('Veuillez entrer un numéro de téléphone valide.');
-    return;
+  function toggleMenu() {
+    document.getElementById('mobileMenu').classList.toggle('open');
   }
 
-  fetch('/api/payment/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': csrfToken,
-    },
-    body: JSON.stringify({
-      number: phoneNumber,
-      pricing: pricing,
-    }),
-  })
-  .then(response => {
-    if (!response.ok) {
-      return response.text().then(text => {
-        throw new Error(`Server error: ${text}`);
-      });
-    }
-    return response.json();
-  })
-  .then(data => {
-    if (data.status === 'created') {
-      window.location.href = data.url;
-    } else {
-      alert(`Erreur: ${data.message}`);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert(`Une erreur est survenue: ${error.message}`);
-  });
-}
+  function selectPlan(el, name, price, period) {
+    document.querySelectorAll('.plan').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('sumPlan').textContent = name;
+    document.getElementById('sumPeriod').textContent = period;
+    document.getElementById('sumTotal').textContent = price === '0' ? 'Gratuit' : price + ' XAF';
+    document.getElementById('selectedPlan').value = name;
+  }
 
+  function selectMethod(el) {
+    document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('selectedMethod').value = el.textContent.trim();
+  }
+
+  function handlePayment() {
+    const plan = document.getElementById('selectedPlan').value;
+    const phoneNumber = document.getElementById('phoneNumber').value;
+    const pricing = plan === 'Bimensuel' ? 500 : plan === 'Mensuel' ? 1000 : 0;
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    if (!phoneNumber) {
+      Swal.fire({
+        title: "Erreur",
+        text: "Veuillez entrer un numéro de téléphone valide.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
+    fetch('/api/payment/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken,
+      },
+      body: JSON.stringify({
+        number: phoneNumber,
+        pricing: pricing,
+      }),
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.text().then(text => {
+          throw new Error(`Server error: ${text}`);
+        });
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.status === 'created') {
+        window.location.href = data.url;
+      } else {
+        Swal.fire({
+          title: "Erreur",
+          text: data.message || "Une erreur est survenue lors du paiement.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      Swal.fire({
+        title: "Erreur",
+        text: `Une erreur est survenue: ${error.message}`,
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    });
+  }
 </script>
+
+</body>
+</html>
