@@ -1,5 +1,5 @@
 
-1. Migrate Alert messages to clean messages
+1. Migrate Alert messages to clean messages #DONE
 
 4. Correcting some mobile style issues
 
