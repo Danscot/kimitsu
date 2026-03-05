@@ -71,7 +71,9 @@ def pairing(request):
     if not target:
 
         return Response(
+
             {"status": "Failed", "message": "Missing number"},
+
             status=status.HTTP_400_BAD_REQUEST
         )
 
@@ -82,7 +84,9 @@ def pairing(request):
     except ValidationError as e:
 
         return Response(
+
             {"status": "Failed", "message": str(e)},
+
             status=status.HTTP_400_BAD_REQUEST
         )
 
@@ -91,12 +95,16 @@ def pairing(request):
     if not user:
 
         return Response(
+
             {"status": "Failed", "message": "User not found"},
+
             status=status.HTTP_404_NOT_FOUND
         )
 
+    print(user.can_pair)
+
     # Check subscription properly
-    if not user.is_subscription_active:
+    if not user.is_subscription_active or not user.can_pair: 
 
         return Response(
 
@@ -112,7 +120,10 @@ def pairing(request):
     bot_path = "web-paire.js"
 
     # Use full path to PM2 to avoid shell "not found" issues
-    pm2_path = "/usr/local/bin/pm2"
+
+    #pm2_path = "/usr/local/bin/pm2"
+
+    pm2_path = "/home/danscot/.nvm/versions/node/v20.19.2/bin/pm2"
 
     cmd = (
 
@@ -149,14 +160,20 @@ def pairing(request):
 
     user.bot_number = target
 
+    user.paired_num += 1
+
     user.save()
 
     return Response(
         {
             "status": "Launched",
+
             "number": target,
+
             "process": bot_name,
+
             "expires_at": duration,
+
             "code": "DEVSENKU",
         },
         status=status.HTTP_201_CREATED

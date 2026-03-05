@@ -11,6 +11,18 @@
         "enabled": false,
         "message": null
       }
+    },
+    "237670701984": {
+      "prefix": "/",
+      "antidel": false,
+      "respons": false,
+      "public": false,
+      "sudo": [],
+      "start": 1772695499533,
+      "autoResponse": {
+        "enabled": false,
+        "message": null
+      }
     }
   }
 }

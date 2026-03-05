@@ -24,6 +24,9 @@ def signup(request):
 
     return render(request, 'signup.html')
 
+
+@login_required(login_url='login')
+
 def pairing(request):
 
     return render(request, 'pairing.html')

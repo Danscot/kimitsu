@@ -44,9 +44,16 @@ class CustomUser(AbstractUser):
 	def __str__(self):
 		return self.email
 
+	@property
 	def can_pair(self):
 
-		return self.paired_num < self.paired_lim
+		if self.paired_num < self.paired_lim:
+
+			return True
+
+		else:
+
+			return False
 
 	def activate_subscription(self, plan_code):
 
@@ -62,13 +69,13 @@ class CustomUser(AbstractUser):
 
 			self.subscription_expiry = timezone.now() + timedelta(days=14)
 
-			self.paired_lim = 2
+			self.paired_lim = 1
 
 		elif plan_code == '1000':
 
 			self.subscription_expiry = timezone.now() + timedelta(days=30)
 
-			self.paired_lim = 5
+			self.paired_lim = 1
 
 		else:
 

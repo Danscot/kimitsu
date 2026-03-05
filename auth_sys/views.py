@@ -82,6 +82,8 @@ def signin(request):
 
         user.ver_code = gen_code(user)
 
+        user.activate_subscription('free')
+
         user.save()
 
         user = authenticate(username=username, password=password)

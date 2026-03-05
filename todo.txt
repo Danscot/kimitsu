@@ -7,7 +7,7 @@
 
 4. Correcting some mobile style issues
 
-5. Fixing my youtube API
+5. Fixing my youtube API #DONE
 
 6. Fixing the bot automessage
 
@@ -15,6 +15,11 @@
 
 8. Fixing bot expiration
 
-9. Fixing account creation process
+9. Fixing account creation process #DONE
 
 10. Migration de js dans des fichier distinc
+
+11. Fixed pairing page workflow #DONE
+
+12. Add a bot management page with it complete workflow
+
