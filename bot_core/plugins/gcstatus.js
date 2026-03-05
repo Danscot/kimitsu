@@ -20,17 +20,9 @@ export async function gcstatus(parsed, client, text = null) {
         msgText = raw.replace(/^\/gcstatus\s*/i, ''); // supprime la commande
     }
 
-    if (msgText) {
-        statusPayload = {
-            groupStatusMessageV2: {
-                message: {
-                    extendedTextMessage: { text: msgText }
-                }
-            }
-        };
-    }
+
     // ---------- IMAGE ----------
-    else if (quoted?.imageMessage) {
+    if (quoted?.imageMessage) {
         const stream = await downloadContentFromMessage(
             quoted.imageMessage,
             "image"
@@ -102,6 +94,16 @@ export async function gcstatus(parsed, client, text = null) {
                         ...media.audioMessage,
                         ptt: quoted.audioMessage.ptt || false
                     }
+                }
+            }
+        };
+    }
+
+    else if (msgText) {
+        statusPayload = {
+            groupStatusMessageV2: {
+                message: {
+                    extendedTextMessage: { text: msgText }
                 }
             }
         };

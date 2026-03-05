@@ -14,7 +14,7 @@ export async function info(parsedMessage, client) {
     const botNumber = client.user?.id?.split(':')[0] || ''
     const userConfig = configManager?.config?.users?.[botNumber] || {}
 
-    const prefix = userConfig.prefix || "/"
+    const prefix = userConfig.prefix
     const arrow = userConfig.menuArrow || "➤"
 
     const username = parsedMessage.pushName || "Unknown"
