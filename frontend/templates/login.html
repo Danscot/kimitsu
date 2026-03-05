@@ -82,14 +82,21 @@
     .then(response => response.json())
     .then(data => {
       if (data.status == "ok") {
+
         window.location.href = "{% url 'profile' %}";
+
       } else {
-        // Replace the default error display with SweetAlert2
+
         Swal.fire({
+
           title: "Erreur",
-          text: "Email ou mot de passe incorrect.",
+
+          text: data.message,
+
           icon: "error",
+
           confirmButtonText: "OK",
+
         });
       }
     })

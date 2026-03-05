@@ -1,0 +1,20 @@
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const errorMessage = "{{ error }}";
+    Swal.fire({
+      title: "Erreur",
+      text: errorMessage,
+      icon: "error",
+      confirmButtonText: "Aller à la page de connexion",
+      confirmButtonColor: "#3085d6",
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "{% url 'signup' %}";
+      }
+    });
+  });
+</script>
+{% endblock %}

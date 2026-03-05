@@ -30,4 +30,6 @@ urlpatterns = [
 
     path('', include('payements.urls')),
 
+    path('', include('mailing.urls')),
+
 ]

@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'auth_sys',
     'rest_framework',
     'bot',
-    'payements'
+    'payements',
+    'mailing',
 ]
 
 MIDDLEWARE = [

@@ -98,7 +98,7 @@
 
   </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
+<<script>
   function handleSignup(e) {
     e.preventDefault();
 
@@ -140,7 +140,18 @@
       .then(response => response.json())
       .then(data => {
         if (data.status == "created") {
-          window.location.href = "{% url 'pairing' %}";
+          // Display the message FIRST, then redirect after user clicks "OK"
+          Swal.fire({
+            title: "Encore quelques étapes",
+            text: "Un lien de vérification a été envoyé à votre adresse email. Vérifiez-le pour vous connecter.",
+            icon: "warning",
+            confirmButtonText: "OK",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = "{% url 'index' %}";
+            }
+          });
+
         } else if (data.status == "ok") {
           Swal.fire({
             title: "Compte existant",
@@ -148,6 +159,7 @@
             icon: "warning",
             confirmButtonText: "OK",
           });
+
         } else {
           Swal.fire({
             title: "Erreur",

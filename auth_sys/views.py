@@ -15,6 +15,8 @@ from rest_framework.response import Response
 
 from rest_framework import status
 
+from mailing.emailer import Email
+
 import random
 
 
@@ -80,22 +82,26 @@ def signin(request):
             password=password
         )
 
-        user.ver_code = gen_code(user)
+        code = gen_code(user)
+
+        user.ver_code = code
 
         user.activate_subscription('free')
 
         user.save()
 
-        user = authenticate(username=username, password=password)
+        smtp = Email(code, user.email)
 
-        login(request, user)
+        smtp.send_verification_code()
 
         return Response(
 
             {
                 "status": "created",
 
-                "message": "User created successfully"
+                "message": "User created successfully",
+
+                "email": user.email,
 
             },
 
@@ -137,6 +143,15 @@ def login_view(request):
  
     if user is not None:
 
+        if not user.email_ver:
+
+            return Response(
+
+                {"status": "error", "message": "Votre address email n'est pas vérifier, regardez le message envoyez dans votre mail."},
+
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         login(request, user)
 
         return Response(
@@ -149,6 +164,7 @@ def login_view(request):
 
             status=status.HTTP_200_OK
         )
+
 
     else:
 
