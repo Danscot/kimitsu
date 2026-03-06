@@ -29,11 +29,11 @@ def clean_number(raw: str) -> str:
 
     if not cleaned.isdigit():
 
-        raise ValidationError("Invalid number: must contain digits only")
+        raise ValidationError("Donnez un numéro valide")
 
     if len(cleaned) < 10 or len(cleaned) > 15:
 
-        raise ValidationError("Invalid number: length must be between 7 and 15 digits")
+        raise ValidationError("Numéro Invalid: Vous devez ajoutez le code du pays. Example +237 pour le cameroon.")
 
     return cleaned
 
