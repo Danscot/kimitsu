@@ -31,7 +31,7 @@ def clean_number(raw: str) -> str:
 
         raise ValidationError("Invalid number: must contain digits only")
 
-    if len(cleaned) < 7 or len(cleaned) > 15:
+    if len(cleaned) < 10 or len(cleaned) > 15:
 
         raise ValidationError("Invalid number: length must be between 7 and 15 digits")
 
