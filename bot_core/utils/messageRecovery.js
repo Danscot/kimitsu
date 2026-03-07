@@ -3,28 +3,41 @@ import configManager from './manageConfigs.js'
 import { downloadContentFromMessage } from 'baileys'
 
 export async function handleDeletedMessage(parsedMessage, client, lid) {
+
     if (!parsedMessage.isDeleted || !parsedMessage.deletedMessageId) return
+
     if (!lid) return
 
+    if (parsedMessage.isFromMe) return
+
     const botNumber = client.user?.id?.split(':')[0] || ''
+
     const userConfig = configManager?.config?.users?.[botNumber] || {}
+
     const antidel = userConfig.antidel || "off"
 
     if (antidel === "off") return
 
     const targetJid =
+
         antidel === "me"
+
             ? botNumber + "@s.whatsapp.net"
+
             : parsedMessage.remoteJid
 
     const messages = loadMessages(lid)
+
     const deletedEntry = messages[parsedMessage.deletedMessageId]
 
     if (!deletedEntry) return
 
     const [messageType, content, participant, messageObj] = deletedEntry
+
     const mentionJid = parsedMessage.participant
+
     const username = mentionJid.split('@')[0]
+
     const warningText = `⚠️ Ce message a été supprimé par @${username}`
 
     try {

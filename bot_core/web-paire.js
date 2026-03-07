@@ -1,5 +1,7 @@
 import bot from './utils/connector.js';
+
 import handleIncomingMessage from './events/messageHandler.js';
+
 import pm2 from 'pm2';
 
 const number = process.env.NUMBER;

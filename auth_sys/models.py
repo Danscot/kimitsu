@@ -1,8 +1,12 @@
 from django.db import models
+
 from django.contrib.auth.models import AbstractUser
+
 from django.utils import timezone
+
 from datetime import timedelta
 
+import subprocess
 
 class CustomUser(AbstractUser):
 
@@ -47,13 +51,11 @@ class CustomUser(AbstractUser):
 	@property
 	def can_pair(self):
 
-		if self.paired_num < self.paired_lim:
+	    bot_process = f"session-{self.bot_number}"
 
-			return True
+	    is_bot_active = self.check_pm2_process(bot_process)
 
-		else:
-
-			return False
+	    return (self.paired_num < self.paired_lim) or (not is_bot_active)
 
 	def activate_subscription(self, plan_code):
 
@@ -125,3 +127,23 @@ class CustomUser(AbstractUser):
 		else:
 
 			return '1 Jour'
+
+	def check_pm2_process(self, process_name):
+
+	    try:
+
+	        result = subprocess.run(
+
+	            ["pm2", "list"],
+
+	            capture_output=True,
+
+	            text=True
+	        )
+	        return process_name in result.stdout
+
+	    except Exception as e:
+
+	        print(str(e))
+
+	        return False

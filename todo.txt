@@ -1,6 +1,4 @@
 
-1. Migrate Alert messages to clean messages #DONE
-
 4. Correcting some mobile style issues
 
 6. Fixing the bot automessage
@@ -11,8 +9,8 @@
 
 12. Add a bot management page with it complete workflow
 
-13. Add email verification
-
-14. Fix pricing #DONE
-
 15. Forgot password nonsense
+
+16. Adapt my subscription verificatioin so that people still have the chance of pairing even after a failure #DONE
+
+17. Kill pm2 process on user disconnection
