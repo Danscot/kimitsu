@@ -123,7 +123,7 @@ def pairing(request):
 
     # Use full path to PM2 to avoid shell "not found" issues
 
-    pm2_path = "pm2"
+    pm2_path = "/home/ubuntu/.nvm/versions/node/v20.20.1/bin/pm2"
 
     #pm2_path = "/home/danscot/.nvm/versions/node/v20.19.2/bin/pm2"
 
