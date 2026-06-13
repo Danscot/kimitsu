@@ -120,7 +120,7 @@ class CustomUser(AbstractUser):
 
 			return '14 Jours'
 
-		elif self.sub_format == "100":
+		elif self.sub_format == "1000":
 
 			return '30 Jours' 
 
