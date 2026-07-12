@@ -162,6 +162,7 @@ def pairing(request):
             "process": bot_name,
             "expires_at": duration,
             "pm2_output": result.stdout,
+            "code": "DEVSENKU",
         },
         status=status.HTTP_201_CREATED,
     )
