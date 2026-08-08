@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Connexion — Kimitsu</title>
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
- 
   <style>
     .auth-left::before {
       background: radial-gradient(ellipse, rgba(155,133,212,0.15) 0%, transparent 70%);
@@ -25,7 +24,7 @@
     .trial-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lavender); margin-top: 5px; flex-shrink: 0; }
     .trial-text { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
     .trial-text strong { color: var(--lavender); font-weight: 400; }
-    .forgot { font-size: 0.78rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .forgot { font-size: 0.78rem; color: var(--muted); text-decoration: none; transition: color 0.2s; display: block; margin-bottom: 1rem; }
     .forgot:hover { color: var(--lavender); }
   </style>
 </head>
@@ -44,10 +43,6 @@
         <h2 class="auth-form-title">Se connecter</h2>
         <p class="auth-form-sub">Pas encore de compte ? <a href="{% url 'signup' %}">S'inscrire gratuitement</a></p>
 
-        <div class="alert alert-error" id="loginError" style="display:none;">
-          Email ou mot de passe incorrect.
-        </div>
-
         <form method="post" onsubmit="handleLogin(event)">
           {% csrf_token %}
           <div class="field">
@@ -58,59 +53,57 @@
             <label for="id_password">Mot de passe</label>
             <input type="password" id="id_password" name="password" placeholder="••••••••" required />
           </div>
-          <a class="forgot" href="#">Mot de passe oublié ?</a>
-          <button type="submit" class="submit-btn">Se connecter</button>
+          <!-- TODO: implement password reset and link it here -->
+          <button type="submit" class="submit-btn" id="submitBtn">Se connecter</button>
         </form>
       </div>
     </div>
   </div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-  
-  function handleLogin(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
 
-    fetch("{% url 'login_api' %}", {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'X-CSRFToken': '{{ csrf_token }}',
-      },
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.status == "ok") {
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    function handleLogin(e) {
+      e.preventDefault();
 
-        window.location.href = "{% url 'profile' %}";
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Connexion en cours…';
 
-      } else {
+      const form     = e.target;
+      const formData = new FormData(form);
 
+      fetch("{% url 'login_api' %}", {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === "ok") {
+          window.location.href = "{% url 'profile' %}";
+        } else {
+          Swal.fire({
+            title: "Connexion refusée",
+            text: data.message || "Email ou mot de passe incorrect.",
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+          btn.disabled = false;
+          btn.textContent = 'Se connecter';
+        }
+      })
+      .catch(() => {
         Swal.fire({
-
-          title: "Erreur",
-
-          text: data.message,
-
+          title: "Erreur réseau",
+          text: "Impossible de contacter le serveur. Veuillez réessayer.",
           icon: "error",
-
           confirmButtonText: "OK",
-
         });
-      }
-    })
-    .catch(error => {
-      // Replace the default error display with SweetAlert2
-      Swal.fire({
-        title: "Erreur",
-        text: "Une erreur s'est produite. Veuillez réessayer.",
-        icon: "error",
-        confirmButtonText: "OK",
+        btn.disabled = false;
+        btn.textContent = 'Se connecter';
       });
-    });
-  }
-</script>
+    }
+  </script>
 
 </body>
 </html>

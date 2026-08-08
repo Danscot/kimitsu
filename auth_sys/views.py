@@ -1,289 +1,122 @@
-
 from rest_framework.decorators import api_view
-
 from rest_framework.response import Response
-
 from rest_framework import status
-
-from .models import CustomUser
-
 from django.contrib.auth import authenticate, login, logout
-
-from rest_framework.decorators import api_view
-
-from rest_framework.response import Response
-
-from rest_framework import status
-
+from django.db import transaction
+from .models import CustomUser
 from mailing.emailer import Email
-
 import random
 
 
-def gen_code(user):
+def gen_code():
+    """Generate a random 6-digit verification code."""
+    return random.randint(100000, 999999)
 
-    code = random.randint(100000, 999999)
-
-    try:
-
-        return code
-
-    except Exception as e:
-
-        return str(e)
 
 @api_view(["POST"])
-
 def signin(request):
-
+    """Register a new user (signup endpoint)."""
     username = request.data.get("name")
-
     email = request.data.get("email")
-
     password = request.data.get("password")
 
     # Validation
-    if not username or not password:
-
+    if not username or not email or not password:
         return Response(
-
-            {
-                "status": "error",
-
-                "message": "Username and password are required"
-
-            },
-
-            status=status.HTTP_400_BAD_REQUEST
+            {"status": "error", "message": "Username, email and password are required"},
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # Check if user exists
-    if (CustomUser.objects.filter(username=username).exists() or CustomUser.objects.filter(email=email).exists()):
-
+    # Check duplicates separately to avoid leaking which field conflicts
+    if CustomUser.objects.filter(username=username).exists() or CustomUser.objects.filter(email=email).exists():
         return Response(
-
-            {
-                "status": "ok",
-
-                "message": "User already exists"
-            },
-
-            status=status.HTTP_200_OK
+            {"status": "conflict", "message": "Un compte existe déjà avec ces informations."},
+            status=status.HTTP_409_CONFLICT,
         )
 
     try:
+        with transaction.atomic():
+            user = CustomUser.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+            )
 
-        user = CustomUser.objects.create_user(
-
-            username=username,
-
-            email=email,
-
-            password=password
-        )
-
-        code = gen_code(user)
-
-        user.ver_code = code
-
-        user.activate_subscription('free')
-
-        user.save()
+            code = gen_code()
+            user.ver_code = code
+            user.sub_format = 'free'
+            from django.utils import timezone
+            from datetime import timedelta
+            user.subscription_expiry = timezone.now() + timedelta(hours=24)
+            user.paired_lim = 1
+            user.save()
 
         smtp = Email(code, user.email)
-
         smtp.send_verification_code()
 
         return Response(
-
             {
                 "status": "created",
-
                 "message": "User created successfully",
-
                 "email": user.email,
-
             },
-
-            status=status.HTTP_201_CREATED
+            status=status.HTTP_201_CREATED,
         )
 
     except Exception as e:
-
         return Response(
-
-
-            {
-                "status": "error",
-
-                "message": str(e)
-            },
-
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            {"status": "error", "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
+
 @api_view(["POST"])
-
 def login_view(request):
-
+    """Authenticate a user by email + password."""
     email = request.data.get("email")
-
     password = request.data.get("password")
 
     if not email or not password:
-
         return Response(
-
             {"status": "error", "message": "Email and password required"},
-
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     user = authenticate(request, email=email, password=password)
- 
+
     if user is not None:
-
         if not user.email_ver:
-
             return Response(
-
-                {"status": "error", "message": "Votre address email n'est pas vérifier, regardez le message envoyez dans votre mail."},
-
-                status=status.HTTP_400_BAD_REQUEST
+                {
+                    "status": "error",
+                    "message": "Votre adresse email n'est pas vérifiée. Regardez le message envoyé dans votre boîte mail.",
+                },
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         login(request, user)
-
         return Response(
-
-            {
-                "status": "ok",
-
-                "message": "Login successful",
-            },
-
-            status=status.HTTP_200_OK
+            {"status": "ok", "message": "Login successful"},
+            status=status.HTTP_200_OK,
         )
 
-
-    else:
-
-        return Response(
-
-            {"status": "error", "message": "Invalid credentials"},
-
-            status=status.HTTP_401_UNAUTHORIZED
-        )
-
+    return Response(
+        {"status": "error", "message": "Invalid credentials"},
+        status=status.HTTP_401_UNAUTHORIZED,
+    )
 
 
 @api_view(["POST"])
-
-def email_verification(request):
-
-    code = request.data.get("code")
-
-    user = request.user
-
-    if user.attempts >= 4:
-
-        user.delete()
-
-        return Response({
-
-            "status": "deleted",
-
-            "message": "Your Account was deleted because you failed to verify your email"
-
-
-            },
-            status=status.HTTP_403_FORBIDDEN
-
-        )
-        
-    try:
-
-        if int(code) != user.ver_code:
-
-            user.ver_code = gen_code(user)
-
-            user.attempts += 1
-
-            user.save()
-            
-            return Response({
-
-                "status": "failed",
-
-                "message":"Wrong code, A new code has been sent to your email.",
-
-                "attempts": user.attempts
-
-                },
-
-            status=status.HTTP_200_OK
-        )
-
-        user.attempts = 0
-
-        user.ver_code = None
-
-        user.email_ver = True
-
-        user.save()
-
-        return Response({
-
-            "status":"ok",
-
-            "message": "Verification successful"
-            },
-
-
-            status=status.HTTP_200_OK
-        )
-
-    except Exception as e:
-
-        return Response({
-
-            "status":"error",
-
-            "message": str(e)
-            },
-
-
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-
-        )
-
-
-@api_view(["POST"])
-
 def user_logout(request):
-
+    """Log out the current user."""
     try:
-    
         logout(request)
-
-        return Response({
-
-            "status":"ok",
-
-            "message":"User logout successfully"
-            },
-
-        status=status.HTTP_200_OK
-    )
-
+        return Response(
+            {"status": "ok", "message": "User logged out successfully"},
+            status=status.HTTP_200_OK,
+        )
     except Exception as e:
-
-        return Response({
-
-            "status":"error",
-
-            "message": str(e)
-            },
-
-        status=status.HTTP_500_INTERNAL_SERVER_ERROR
-    )
+        return Response(
+            {"status": "error", "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )

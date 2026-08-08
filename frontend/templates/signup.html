@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Inscription — Kimitsu</title>
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
- <style>
+  <style>
     .auth-left::before {
       background: radial-gradient(ellipse, rgba(155,133,212,0.15) 0%, transparent 70%);
     }
@@ -24,8 +24,6 @@
     .trial-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lavender); margin-top: 5px; flex-shrink: 0; }
     .trial-text { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
     .trial-text strong { color: var(--lavender); font-weight: 400; }
-    .forgot { font-size: 0.78rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
-    .forgot:hover { color: var(--lavender); }
   </style>
 </head>
 <body>
@@ -49,137 +47,93 @@
         </div>
 
         <form method="post" onsubmit="handleSignup(event)">
-
           {% csrf_token %}
 
           <div class="field">
-
             <label for="id_name">Username</label>
-
             <input type="text" id="id_name" name="name" placeholder="ton Username" required />
-
           </div>
 
           <div class="field">
-
             <label for="id_email">Adresse email</label>
-
             <input type="email" id="id_email" name="email" placeholder="toi@email.com" required />
-
           </div>
 
           <div class="field">
-
             <label for="id_password">Mot de passe</label>
-
             <input type="password" id="id_password" name="password" placeholder="••••••••" required />
-
-            <div class="field-error" id="passError">Le mot de passe doit contenir au moins 8 caractères.</div>
-
           </div>
 
           <div class="field">
-
             <label for="id_confirm">Confirmer le mot de passe</label>
-
             <input type="password" id="id_confirm" name="confirm" placeholder="••••••••" required />
-
-            <div class="field-error" id="confirmError">Les mots de passe ne correspondent pas.</div>
-
           </div>
 
-          <button type="submit" class="submit-btn">Créer mon compte</button>
-
+          <button type="submit" class="submit-btn" id="submitBtn">Créer mon compte</button>
         </form>
 
       </div>
-
     </div>
-
   </div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<<script>
-  function handleSignup(e) {
-    e.preventDefault();
 
-    const pass = document.getElementById('id_password').value;
-    const confirm = document.getElementById('id_confirm').value;
-    let valid = true;
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    function handleSignup(e) {
+      e.preventDefault();
 
-    if (pass.length < 8) {
-      Swal.fire({
-        title: "Erreur",
-        text: "Le mot de passe doit contenir au moins 8 caractères.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-      valid = false;
-    }
+      const pass    = document.getElementById('id_password').value;
+      const confirm = document.getElementById('id_confirm').value;
 
-    if (pass !== confirm) {
-      Swal.fire({
-        title: "Erreur",
-        text: "Les mots de passe ne correspondent pas.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-      valid = false;
-    }
+      if (pass.length < 8) {
+        Swal.fire({ title: "Erreur", text: "Le mot de passe doit contenir au moins 8 caractères.", icon: "error", confirmButtonText: "OK" });
+        return;
+      }
 
-    if (valid) {
-      const form = e.target;
+      if (pass !== confirm) {
+        Swal.fire({ title: "Erreur", text: "Les mots de passe ne correspondent pas.", icon: "error", confirmButtonText: "OK" });
+        return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Création en cours…';
+
+      const form     = e.target;
       const formData = new FormData(form);
 
       fetch("{% url 'signin_api' %}", {
         method: 'POST',
         body: formData,
-        headers: {
-          'X-CSRFToken': '{{ csrf_token }}',
-        },
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
       })
       .then(response => response.json())
       .then(data => {
-        if (data.status == "created") {
-          // Display the message FIRST, then redirect after user clicks "OK"
+        if (data.status === "created") {
           Swal.fire({
-            title: "Encore quelques étapes",
-            text: "Un lien de vérification a été envoyé à votre adresse email. Vérifiez-le pour vous connecter.",
-            icon: "warning",
+            title: "Vérifiez votre email",
+            text: "Un lien de vérification a été envoyé à votre adresse email. Cliquez dessus pour activer votre compte.",
+            icon: "success",
             confirmButtonText: "OK",
-          }).then((result) => {
-            if (result.isConfirmed) {
-              window.location.href = "{% url 'index' %}";
-            }
-          });
+          }).then(() => { window.location.href = "{% url 'login' %}"; });
 
-        } else if (data.status == "ok") {
-          Swal.fire({
-            title: "Compte existant",
-            text: "Un compte existe déjà avec ces informations.",
-            icon: "warning",
-            confirmButtonText: "OK",
-          });
+        } else if (data.status === "conflict") {
+          Swal.fire({ title: "Compte existant", text: "Un compte existe déjà avec ces informations.", icon: "warning", confirmButtonText: "OK" });
+          btn.disabled = false;
+          btn.textContent = 'Créer mon compte';
 
         } else {
-          Swal.fire({
-            title: "Erreur",
-            text: "Une erreur est survenue. Veuillez réessayer.",
-            icon: "error",
-            confirmButtonText: "OK",
-          });
+          Swal.fire({ title: "Erreur", text: data.message || "Une erreur est survenue. Veuillez réessayer.", icon: "error", confirmButtonText: "OK" });
+          btn.disabled = false;
+          btn.textContent = 'Créer mon compte';
         }
       })
-      .catch(error => {
-        Swal.fire({
-          title: "Erreur",
-          text: "Une erreur est survenue. Veuillez réessayer.",
-          icon: "error",
-          confirmButtonText: "OK",
-        });
+      .catch(() => {
+        Swal.fire({ title: "Erreur réseau", text: "Impossible de contacter le serveur. Veuillez réessayer.", icon: "error", confirmButtonText: "OK" });
+        btn.disabled = false;
+        btn.textContent = 'Créer mon compte';
       });
     }
-  }
-</script>
+  </script>
 
 </body>
 </html>
