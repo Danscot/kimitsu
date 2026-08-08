@@ -111,8 +111,16 @@
         if (data.status === "created") {
           Swal.fire({
             title: "Vérifiez votre email",
-            text: "Un lien de vérification a été envoyé à votre adresse email. Cliquez dessus pour activer votre compte.",
+            text: "Un lien de vérification a été envoyé à " + data.email + ". Cliquez dessus pour activer votre compte.",
             icon: "success",
+            confirmButtonText: "OK",
+          }).then(() => { window.location.href = "{% url 'login' %}"; });
+
+        } else if (data.status === "created_email_failed") {
+          Swal.fire({
+            title: "Compte créé",
+            html: "Votre compte a été créé mais l'email de vérification n'a pas pu être envoyé.<br><br><small style='color:#aaa'>Erreur: " + (data.debug || '') + "</small><br><br>Contactez le support.",
+            icon: "warning",
             confirmButtonText: "OK",
           }).then(() => { window.location.href = "{% url 'login' %}"; });
 

@@ -3,9 +3,14 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate, login, logout
 from django.db import transaction
+from django.conf import settings
 from .models import CustomUser
 from mailing.emailer import Email
 import random
+import logging
+import smtplib
+
+logger = logging.getLogger(__name__)
 
 
 def gen_code():
@@ -17,7 +22,7 @@ def gen_code():
 def signin(request):
     """Register a new user (signup endpoint)."""
     username = request.data.get("name")
-    email = request.data.get("email")
+    email    = request.data.get("email")
     password = request.data.get("password")
 
     # Validation
@@ -27,8 +32,9 @@ def signin(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # Check duplicates separately to avoid leaking which field conflicts
-    if CustomUser.objects.filter(username=username).exists() or CustomUser.objects.filter(email=email).exists():
+    # Check duplicates
+    if CustomUser.objects.filter(username=username).exists() or \
+       CustomUser.objects.filter(email=email).exists():
         return Response(
             {"status": "conflict", "message": "Un compte existe déjà avec ces informations."},
             status=status.HTTP_409_CONFLICT,
@@ -41,7 +47,6 @@ def signin(request):
                 email=email,
                 password=password,
             )
-
             code = gen_code()
             user.ver_code = code
             user.sub_format = 'free'
@@ -51,9 +56,36 @@ def signin(request):
             user.paired_lim = 1
             user.save()
 
-        smtp = Email(code, user.email)
-        smtp.send_verification_code()
+    except Exception as e:
+        logger.exception("Error creating user during signup")
+        return Response(
+            {"status": "error", "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
+    # User created — now try sending the email separately
+    # so a mail failure never blocks account creation
+    try:
+        smtp_obj = Email(code, user.email)
+        smtp_obj.send_verification_code()
+        email_sent = True
+        email_error = None
+    except smtplib.SMTPAuthenticationError as e:
+        email_sent = False
+        email_error = f"SMTP Auth failed: {e.smtp_code} {e.smtp_error}"
+        logger.error("SMTP auth error during signup — HOST=%s USER=%s PORT=%s TLS=%s | Error: %s",
+            settings.EMAIL_HOST,
+            settings.EMAIL_HOST_USER,
+            settings.EMAIL_PORT,
+            settings.EMAIL_USE_TLS,
+            email_error,
+        )
+    except Exception as e:
+        email_sent = False
+        email_error = str(e)
+        logger.exception("Unexpected email error during signup")
+
+    if email_sent:
         return Response(
             {
                 "status": "created",
@@ -62,18 +94,23 @@ def signin(request):
             },
             status=status.HTTP_201_CREATED,
         )
-
-    except Exception as e:
+    else:
+        # User exists but email failed — tell them clearly
         return Response(
-            {"status": "error", "message": str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            {
+                "status": "created_email_failed",
+                "message": "Compte créé, mais l'envoi de l'email a échoué. Contactez le support.",
+                "email": user.email,
+                "debug": email_error,   # remove this line in final production
+            },
+            status=status.HTTP_201_CREATED,
         )
 
 
 @api_view(["POST"])
 def login_view(request):
     """Authenticate a user by email + password."""
-    email = request.data.get("email")
+    email    = request.data.get("email")
     password = request.data.get("password")
 
     if not email or not password:
@@ -93,7 +130,6 @@ def login_view(request):
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
-
         login(request, user)
         return Response(
             {"status": "ok", "message": "Login successful"},
