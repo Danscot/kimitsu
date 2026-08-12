@@ -2,6 +2,7 @@ import { prepareWAMessageMedia, downloadContentFromMessage } from "baileys";
 import fs from "fs";
 
 export async function gcstatus(parsed, client, text = null) {
+    //120363199333409121@g.us
     const from = parsed.remoteJid;
     if (!from || !parsed.isGroup) return false;
 
