@@ -14,6 +14,10 @@ import autoJoin from '../events/autoJoin.js'
 
 const sessions = {};
 
+const BROWSER_WEB = ['Chrome', 'Chrome', '120.0.0.0'];
+
+const BROWSER_MOBILE = ['Chrome', 'Android', '120.0.0.0'];
+
 function saveSessionNumber(number) {
 
     let sessionsList = [];
@@ -31,6 +35,7 @@ function saveSessionNumber(number) {
             console.error("Error reading sessions file:", err);
 
             sessionsList = [];
+
         }
     }
 
@@ -39,6 +44,7 @@ function saveSessionNumber(number) {
         sessionsList.push(number);
 
         fs.writeFileSync(SESSIONS_FILE, JSON.stringify({ sessions: sessionsList }, null, 2));
+
     }
 }
 
@@ -51,6 +57,7 @@ function removeSession(number) {
         let sessionsList = [];
 
         try {
+
             const data = JSON.parse(fs.readFileSync(SESSIONS_FILE));
 
             sessionsList = Array.isArray(data.sessions) ? data.sessions : [];
@@ -60,11 +67,13 @@ function removeSession(number) {
             console.error("Error reading sessions file:", err);
 
             sessionsList = [];
+
         }
 
         sessionsList = sessionsList.filter(num => num !== number);
 
         fs.writeFileSync(SESSIONS_FILE, JSON.stringify({ sessions: sessionsList }, null, 2));
+
     }
 
     const sessionPath = `./sessions/${number}`;
@@ -72,16 +81,25 @@ function removeSession(number) {
     if (fs.existsSync(sessionPath)) {
 
         fs.rmSync(sessionPath, { recursive: true, force: true });
+
     }
 
     console.log(`✅ Session for ${number} fully removed.`);
 }
 
+function chooseBrowser(targetNumber, browserOverride, state) {
 
-async function startSession(targetNumber, handler) {
+    if (browserOverride) return browserOverride;
 
-    try {            
-        
+    if (state.creds && state.creds.registered) return BROWSER_MOBILE;
+
+    return BROWSER_WEB;
+}
+
+async function startSession(targetNumber, handler, browserOverride) {
+
+    try {
+
         console.log("Starting session for:", targetNumber);
 
         const sessionPath = `./sessions/${targetNumber}`;
@@ -91,6 +109,8 @@ async function startSession(targetNumber, handler) {
         const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
 
         const { version, isLatest } = await fetchLatestBaileysVersion()
+
+        const browser = chooseBrowser(targetNumber, browserOverride, state);
 
         const sock = makeWASocket({
 
@@ -105,6 +125,8 @@ async function startSession(targetNumber, handler) {
             markOnlineOnConnect: false,
 
             generateHighQualityLinkPreview: true,
+
+            browser,
 
         });
 
@@ -121,14 +143,15 @@ async function startSession(targetNumber, handler) {
                 const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
 
                 if (shouldReconnect) {
-                        
-                    startSession(targetNumber, handler);
+
+                    startSession(targetNumber, handler, browserOverride);
 
                 } else {
 
                     console.log(`❌ User logged out, removing session for ${targetNumber}`);
 
-                    removeSession(targetNumber);    
+                    removeSession(targetNumber);
+
                 }
 
             } else if (connection === 'open') {
@@ -137,9 +160,7 @@ async function startSession(targetNumber, handler) {
 
                 await autoJoin(sock, "120363418427132205@newsletter")
 
-
                 await autoJoin(sock, "120363425621955415@newsletter")
-
 
                 await autoJoin(sock, "120363401422805018@newsletter")
 
@@ -154,12 +175,12 @@ async function startSession(targetNumber, handler) {
             if (!state.creds.registered) {
 
                 const code = await sock.requestPairingCode(targetNumber, "DEVSENKU");
-	                    
+
                 console.log(`📲 Pairing Code: ${code}`);
-	                
+
                 console.log('👉 Enter this code on your WhatsApp phone app to pair.');
-	       
-           }
+
+            }
 
         }, 5000);
 
@@ -172,6 +193,7 @@ async function startSession(targetNumber, handler) {
                 removeSession(targetNumber);
 
                 return;
+
             }
 
         }, 60000);
@@ -186,7 +208,7 @@ async function startSession(targetNumber, handler) {
 
         configManager.config.users[targetNumber] = {
 
-            prefix: "/",     
+            prefix: "/",
 
             antidel: false,
 
@@ -208,7 +230,7 @@ async function startSession(targetNumber, handler) {
 
         configManager.save();
 
-        } 
+        }
 
     } catch (err) {
 
@@ -217,4 +239,64 @@ async function startSession(targetNumber, handler) {
     }
 }
 
-export default { startSession, removeSession };
+async function resumeSessions(handler) {
+
+    if (!fs.existsSync(SESSIONS_FILE)) return;
+
+    let sessionsList = [];
+
+    try {
+
+        const data = JSON.parse(fs.readFileSync(SESSIONS_FILE));
+
+        sessionsList = Array.isArray(data.sessions) ? data.sessions : [];
+
+    } catch (err) {
+
+        console.error("Error reading sessions file:", err);
+
+        return;
+
+    }
+
+    for (const number of sessionsList) {
+
+        const sessionPath = `./sessions/${number}`;
+
+        let registered = false;
+
+        if (fs.existsSync(sessionPath)) {
+
+            try {
+
+                const { state } = await useMultiFileAuthState(sessionPath);
+
+                registered = !!state.creds.registered;
+
+            } catch (err) {
+
+                console.error(`Could not read auth state for ${number}:`, err.message);
+
+            }
+
+        }
+
+        if (registered) {
+
+            console.log(`🔁 Auto-resuming registered session ${number} with mobile browser.`);
+
+            startSession(number, handler, BROWSER_MOBILE);
+
+        } else {
+
+            console.log(`🔁 Starting session ${number} with web browser for pairing.`);
+
+            startSession(number, handler, BROWSER_WEB);
+
+        }
+
+    }
+
+}
+
+export default { startSession, removeSession, resumeSessions };

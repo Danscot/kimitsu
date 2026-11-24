@@ -1,4 +1,6 @@
 
-import pairing from './events/pairing.js'
+import bot from './utils/connector.js'
 
-pairing()
+import handleIncomingMessage from './events/messageHandler.js'
+
+bot.resumeSessions(handleIncomingMessage);

@@ -7,7 +7,7 @@ import 'dotenv/config'
 
 async function pairing() {
 
-	const number = "237694994571"
+	const number = "237655927791"
 
 	if(!number)  return console.log("number was not specify")
 
